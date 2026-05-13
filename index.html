@@ -229,6 +229,46 @@ html,body{
 .check-item.done .ci-check::after{content:'';width:8px;height:5px;border-left:1.5px solid #fff;border-bottom:1.5px solid #fff;transform:rotate(-45deg) translateY(-1px);display:block;}
 .ci-text{flex:1;font-size:13px;color:var(--text);line-height:1.4;}
 .ci-gold{font-size:9px;color:var(--gold);opacity:.55;}
+/* priority */
+.priority-item{background:var(--surface2);border:1px solid rgba(160,120,48,.28);border-radius:12px;padding:15px 16px;margin-bottom:8px;cursor:pointer;position:relative;overflow:hidden;transition:all .2s;}
+.priority-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--gold2);border-radius:3px 0 0 3px;box-shadow:0 0 8px rgba(200,160,80,.4);}
+.priority-item:hover{border-color:rgba(160,120,48,.5);background:var(--surface3);}
+.priority-item.done{opacity:.35;border-color:var(--border);}
+.priority-item.done::before{background:var(--teal2);box-shadow:none;}
+.priority-item.completing{animation:piPop .35s cubic-bezier(.2,1.4,.4,1);}
+@keyframes piPop{0%{transform:scale(1);}50%{transform:scale(1.02);}100%{transform:scale(1);}}
+.pi-main{display:flex;align-items:flex-start;gap:12px;margin-bottom:0;}
+.pi-check{width:22px;height:22px;flex-shrink:0;margin-top:2px;border:1.5px solid rgba(160,120,48,.45);border-radius:6px;display:flex;align-items:center;justify-content:center;background:rgba(160,120,48,.06);transition:all .2s;}
+.priority-item.done .pi-check{background:var(--teal2);border-color:var(--teal2);}
+.priority-item.done .pi-check::after{content:'';width:11px;height:6px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg) translateY(-1px);display:block;}
+.pi-text{flex:1;font-size:15px;font-weight:500;color:var(--text);line-height:1.5;}
+.priority-item.done .pi-text{text-decoration:line-through;color:var(--text3);}
+.pi-sub{display:flex;align-items:center;gap:8px;margin-top:9px;padding-top:8px;border-top:1px solid rgba(58,48,96,.3);}
+.pi-reward{font-size:10px;color:var(--gold);opacity:.65;display:flex;align-items:center;gap:6px;}
+.pi-hint{margin-left:auto;font-size:10px;color:var(--text3);}
+.priority-item.done .pi-hint{color:var(--teal2);}
+/* routine */
+.routine-item{display:flex;align-items:center;gap:10px;padding:11px 13px;border-radius:9px;cursor:pointer;border:1px solid var(--border);background:var(--surface2);margin-bottom:5px;transition:all .15s;}
+.routine-item:hover{border-color:var(--border2);background:var(--surface3);}
+.routine-item.done{opacity:.32;}
+.routine-item.done .ri-text{text-decoration:line-through;color:var(--text3);}
+.routine-item.completing{animation:riPop .25s cubic-bezier(.2,1.4,.4,1);}
+@keyframes riPop{0%{transform:scale(1);}50%{transform:scale(1.015);}100%{transform:scale(1);}}
+.ri-check{width:18px;height:18px;flex-shrink:0;border:1px solid var(--border2);border-radius:4px;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.routine-item.done .ri-check{background:var(--teal2);border-color:var(--teal2);}
+.routine-item.done .ri-check::after{content:'';width:9px;height:5px;border-left:1.5px solid #fff;border-bottom:1.5px solid #fff;transform:rotate(-45deg) translateY(-1px);display:block;}
+.ri-text{flex:1;font-size:13px;font-weight:400;color:var(--text);line-height:1.4;}
+.ri-gold{font-size:9px;color:var(--gold);opacity:.45;}
+/* life */
+.life-item{display:flex;align-items:center;gap:10px;padding:8px 11px;border-radius:8px;cursor:pointer;border:1px solid transparent;margin-bottom:3px;transition:all .12s;}
+.life-item:hover{background:var(--surface2);border-color:var(--border);}
+.life-item.done{opacity:.28;}
+.life-item.done .li-text{text-decoration:line-through;color:var(--text3);}
+.li-dot{width:3px;height:3px;border-radius:50%;background:var(--border2);flex-shrink:0;}
+.li-text{flex:1;font-size:12px;color:var(--text2);line-height:1.4;}
+.li-check{width:15px;height:15px;flex-shrink:0;border:1px solid var(--border);border-radius:3px;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.life-item.done .li-check{background:var(--teal2);border-color:var(--teal2);}
+.life-item.done .li-check::after{content:'';width:7px;height:4px;border-left:1.5px solid #fff;border-bottom:1.5px solid #fff;transform:rotate(-45deg) translateY(-1px);display:block;}
 
 /* 追加フォーム */
 .add-strip{display:flex;gap:7px;margin-top:12px;}
@@ -727,8 +767,14 @@ html,body{
     <div class="logo">SAVE POINT<span class="logo-sub">SKILLBASE</span></div>
   </div>
   <div class="header-right">
-    <div class="gold-badge" id="gold-badge">&#9670; <span id="gold-val">320</span>G</div>
-    <div class="lv-badge">Lv.<span id="lv-val">7</span></div>
+    <div class="gold-badge" id="gold-badge">
+      <span class="gold-icon">&#9670;</span>
+      <span id="gold-val">0</span>G
+    </div>
+    <div class="lv-badge">
+      <span class="lv-label">LV</span>
+      <span class="lv-num" id="lv-val">0</span>
+    </div>
   </div>
 </div>
 
@@ -1051,15 +1097,37 @@ function renderTodayQs(){
     const extraQ=S.extraTasks.filter(q=>q.sec===sec);
     const items=[...fixedQ,...extraQ];
     if(!items.length)continue;
-    html+=`<div style="margin-bottom:14px;">
-      <div class="sec-label">${cfg.label}</div>`;
+    const secClass=sec==='main'?'sec-primary':sec==='routine'?'sec-normal':'sec-sub';
+    const secLineClass=sec==='main'?'sec-primary-line':sec==='routine'?'sec-normal-line':'sec-sub-line';
+    const secLabelClass=sec==='main'?'sec-primary-badge':sec==='routine'?'sec-normal-label':'sec-sub-label';
+    html+=`<div style="margin-bottom:${sec==='main'?'22px':'18px'};">
+      <div class="${secClass}">
+        <div class="${secLabelClass}">${sec==='main'?'TODAY&#39;S QUEST':cfg.label}</div>
+        <div class="${secLineClass}"></div>
+      </div>`;
     for(const q of items){
       const done=!!S.done[q.id];
-      html+=`<div class="check-item${done?' done':''}" id="ci_${q.id}" onclick="toggleQ('${q.id}','${sec}')">
-        <div class="ci-check"></div>
-        <span class="ci-text">${q.text}</span>
-        ${!done?`<span class="ci-gold">+${cfg.gold}G</span>`:''}
-      </div>`;
+      if(sec==='main'){
+        html+=`<div class="priority-item${done?' done':''}" id="ci_${q.id}" onclick="toggleQ('${q.id}','${sec}')">
+          <div class="pi-main"><div class="pi-check"></div><div class="pi-text">${q.text}</div></div>
+          <div class="pi-sub">
+            <div class="pi-reward">&#9670; +${cfg.gold}G &nbsp;&#9670; +${cfg.exp} EXP</div>
+            <div class="pi-hint">${done?'&#10003; 討伐済み':'タップで討伐'}</div>
+          </div>
+        </div>`;
+      } else if(sec==='routine'){
+        html+=`<div class="routine-item${done?' done':''}" id="ci_${q.id}" onclick="toggleQ('${q.id}','${sec}')">
+          <div class="ri-check"></div>
+          <span class="ri-text">${q.text}</span>
+          ${!done?`<span class="ri-gold">+${cfg.gold}G</span>`:''}
+        </div>`;
+      } else {
+        html+=`<div class="life-item${done?' done':''}" id="ci_${q.id}" onclick="toggleQ('${q.id}','${sec}')">
+          <div class="li-dot"></div>
+          <span class="li-text">${q.text}</span>
+          <div class="li-check"></div>
+        </div>`;
+      }
     }
     html+='</div>';
   }
