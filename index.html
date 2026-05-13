@@ -965,51 +965,22 @@ const SPIRIT_TYPES={
 };
 const STATE_LABELS={egg:'卵',great:'絶好調',ok:'元気',bad:'サボり',dead:'屍・毒'};
 const FIXED_QUESTS={
-  main:[
-    {id:'m1',text:'スナラボLP　今日のタスクを進める',sec:'main'},
-    {id:'m2',text:'梶川さん動画編集',sec:'main'},
-    {id:'m3',text:'note完全攻略③視聴',sec:'main'},
-  ],
-  routine:[
-    {id:'r1',text:'不用品出品（1個）',sec:'routine'},
-    {id:'r2',text:'メルカリ個人アカ商品出品',sec:'routine'},
-    {id:'r3',text:'SHOPSいいね回り',sec:'routine'},
-    {id:'r4',text:'ヤフフリいいね回り',sec:'routine'},
-    {id:'r5',text:'星猫パス研修受講',sec:'routine'},
-    {id:'r6',text:'商品発注',sec:'routine'},
-  ],
-  life:[
-    {id:'l1',text:'ゴミ出し',sec:'life'},
-    {id:'l2',text:'洗濯物',sec:'life'},
-    {id:'l3',text:'有酸素運動',sec:'life'},
-    {id:'l4',text:'肩回し・ストレッチ',sec:'life'},
-  ],
+  main:[],
+  routine:[],
+  life:[],
 };
 const SEC_CFG={
   main:{label:'今日やること',color:'var(--purple2)',gold:15,exp:30},
   routine:{label:'日次収益クエスト',color:'var(--teal2)',gold:10,exp:20},
   life:{label:'生活・運動クエスト',color:'var(--text3)',gold:5,exp:10},
 };
-const BACKLOG=[
-  {cat:'スギタカメラ',items:['RYOTAさんの撮影日程再設定（夏）']},
-  {cat:'SKILLBASE',items:['シャッターストック利用登録','カメラマン養成講座作成','中国輸入コンテンツ作成','スナラボコンセプトムービー','SKILL BASE誕生秘話作成']},
-  {cat:'開発予定',items:['SHOPS専用ツール開発（スナネコ）','写真基礎ツール開発（ロウ）','マインドハックツール開発（リュオ）','note専用ツール開発（シチリン）']},
-];
+const BACKLOG=[];
 const PROJ_COLORS=['#8060b0','#1D9E75','#c87020','#185FA5','#993556','#a07030','#2a6a5a'];
 const DEF={
-  gold:320,xp:240,lv:7,streak:3,lastDate:'',
+  gold:0,xp:0,lv:0,streak:0,lastDate:'',
   done:{},extraTasks:[],
-  projects:[
-    {id:'pj1',name:'スナラボLP作成',startDate:'2026-05-01',endDate:'2026-07-31',progress:30,completed:false,color:'#8060b0'},
-    {id:'pj2',name:'ダンジョン作成',startDate:'2026-04-01',endDate:'2026-10-31',progress:20,completed:false,color:'#c87020'},
-    {id:'pj3',name:'物販撮影基礎教材',startDate:'2026-05-10',endDate:'2026-08-31',progress:15,completed:false,color:'#1D9E75'},
-    {id:'pj4',name:'SHOPS専用ツール開発',startDate:'2026-07-01',endDate:'2026-11-30',progress:0,completed:false,color:'#185FA5'},
-  ],
-  vows:[
-    {id:'v1',text:'出品を止めない。毎日一つでも前に進む。',color:'#8060b0',fulfilled:false,date:'5/1'},
-    {id:'v2',text:'撮影に丁寧に向き合う。',color:'#2a8070',fulfilled:false,date:'5/1'},
-    {id:'v3',text:'朝を整える。開幕を大切にする。',color:'#a07830',fulfilled:false,date:'5/1'},
-  ],
+  projects:[],
+  vows:[],
   weeks:{},
   spirit:{type:'dark',name:'',state:'egg',contracted:false},
 };
