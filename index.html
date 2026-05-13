@@ -1,0 +1,1496 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>SAVE POINT — SKILLBASE</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Noto+Sans+JP:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  /* ── コアカラー：深夜の作業部屋 ── */
+  --ink:#0f0c1a;           /* 最深部 */
+  --surface:#161228;        /* ベース背景 */
+  --surface2:#1e1834;       /* カード背景 */
+  --surface3:#261f40;       /* インナー */
+  --surface4:#2e2850;       /* ホバー */
+
+  /* ── ボーダー：細い魔法線 ── */
+  --border:#3a3060;
+  --border2:#4a4080;        /* 少し明るいライン */
+  --border-glow:rgba(160,130,220,.25); /* 発光ライン */
+
+  /* ── ゴールド：くすみ金 ── */
+  --gold:#a07830;           /* くすみゴールド */
+  --gold2:#c8a050;          /* 少し明るいゴールド */
+  --gold3:#e8c87a;          /* ハイライトゴールド */
+  --gold-glow:rgba(200,160,80,.15);
+
+  /* ── テキスト：生成り系 ── */
+  --text:#d8ceb8;           /* メインテキスト：生成り */
+  --text2:#8a7a9a;          /* サブテキスト：くすみパープル */
+  --text3:#5a4f6a;          /* ヒントテキスト */
+  --text-dim:#3a3050;       /* ごく薄いテキスト */
+
+  /* ── アクセント ── */
+  --purple:#5a3f8a;
+  --purple2:#8060b0;
+  --purple3:#a080d0;        /* 発光紫 */
+  --teal:#1a5a50;
+  --teal2:#2a8070;
+  --red:#7a2030;
+  --red2:#c04050;
+
+  /* ── 発光 ── */
+  --glow-gold:0 0 12px rgba(200,160,80,.2),0 0 24px rgba(200,160,80,.08);
+  --glow-purple:0 0 10px rgba(160,128,208,.2),0 0 20px rgba(160,128,208,.08);
+  --glow-soft:0 2px 12px rgba(0,0,0,.4);
+}
+
+html,body{
+  background:var(--surface);
+  color:var(--text);
+  font-family:'Noto Sans JP',sans-serif;
+  font-size:14px;
+  max-width:480px;
+  margin:0 auto;
+  min-height:100vh;
+  overflow-x:hidden;
+  /* 紙のような質感：薄いノイズ */
+  background-image:
+    radial-gradient(ellipse at 20% 0%, rgba(90,63,138,.12) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 100%, rgba(26,90,80,.08) 0%, transparent 60%);
+}
+
+/* ── HEADER ── */
+.header{
+  background:rgba(14,11,26,.92);
+  border-bottom:1px solid var(--border);
+  padding:11px 16px;
+  display:flex;align-items:center;gap:12px;
+  position:sticky;top:0;z-index:20;
+  backdrop-filter:blur(8px);
+}
+/* ヘッダー：薄い上部ライン */
+.header::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  opacity:.4;
+}
+.logo{font-family:'Cinzel',serif;font-size:13px;color:var(--gold3);letter-spacing:.2em;font-weight:600;}
+.logo-sub{font-size:9px;color:var(--text3);display:block;letter-spacing:.25em;font-family:'Noto Sans JP',sans-serif;margin-top:1px;}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:6px;}
+.gold-badge{
+  background:rgba(160,120,48,.12);
+  border:1px solid rgba(160,120,48,.4);
+  border-radius:20px;padding:3px 10px;
+  font-size:11px;color:var(--gold2);
+  transition:all .3s;
+}
+.gold-badge.pop{transform:scale(1.1);box-shadow:var(--glow-gold);}
+.lv-badge{background:var(--surface3);border:1px solid var(--border);border-radius:20px;padding:3px 10px;font-size:11px;color:var(--text2);}
+
+/* ── TABS ── */
+.tabs{
+  display:flex;
+  background:rgba(14,11,26,.88);
+  border-bottom:1px solid var(--border);
+  position:sticky;top:50px;z-index:19;
+  overflow-x:auto;
+  backdrop-filter:blur(8px);
+}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{
+  flex-shrink:0;padding:9px 13px;
+  font-size:10px;color:var(--text3);
+  cursor:pointer;border-bottom:1px solid transparent;
+  transition:all .2s;white-space:nowrap;
+  letter-spacing:.04em;
+}
+.tab.active{color:var(--gold2);border-bottom-color:var(--gold);}
+.tab:hover:not(.active){color:var(--text2);}
+
+/* ── VIEWS ── */
+.view{display:none;padding:16px 14px 100px;}
+.view.active{display:block;}
+
+/* ── カード基本 ── */
+.card{
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:12px;
+  position:relative;
+  overflow:hidden;
+}
+/* カード：薄い内側グロー */
+.card::after{
+  content:'';
+  position:absolute;inset:0;
+  border-radius:inherit;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04),inset 0 -1px 0 rgba(0,0,0,.2);
+  pointer-events:none;
+}
+
+/* ── TODAY ── */
+.day-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.day-date{font-size:11px;color:var(--text3);letter-spacing:.04em;}
+.day-streak{
+  display:flex;align-items:center;gap:5px;
+  background:rgba(160,120,48,.1);
+  border:1px solid rgba(160,120,48,.3);
+  border-radius:20px;padding:3px 10px;
+}
+.streak-num{font-size:13px;font-weight:500;color:var(--gold2);}
+.streak-label{font-size:10px;color:var(--text3);}
+
+/* 進捗リング：EXP発光 */
+.today-summary{
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:14px 16px;
+  margin-bottom:14px;
+  display:flex;align-items:center;gap:14px;
+  position:relative;overflow:hidden;
+}
+.today-summary::before{
+  content:'';position:absolute;
+  top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(160,120,48,.4),transparent);
+}
+.ring-track{fill:none;stroke:#261f40;stroke-width:4;}
+.ring-fill{
+  fill:none;stroke:var(--gold);stroke-width:4;stroke-linecap:round;
+  transform:rotate(-90deg);transform-origin:center;
+  transition:stroke-dashoffset .8s cubic-bezier(.4,0,.2,1);
+  filter:drop-shadow(0 0 4px rgba(200,160,80,.4));
+}
+.today-text{flex:1;}
+.today-done-num{font-size:22px;font-weight:500;color:var(--gold3);line-height:1;}
+.today-done-sub{font-size:10px;color:var(--text3);margin-top:3px;}
+.today-msg{font-size:11px;color:var(--text2);margin-top:6px;line-height:1.6;font-style:italic;}
+
+/* XP：微弱発光 */
+.xp-strip{
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:8px;padding:8px 13px;
+  margin-bottom:16px;
+  display:flex;align-items:center;gap:10px;
+}
+.xp-strip-label{font-size:10px;color:var(--text2);white-space:nowrap;}
+.xp-strip-track{flex:1;height:3px;background:var(--surface3);border-radius:2px;}
+.xp-strip-fill{
+  height:3px;border-radius:2px;
+  background:linear-gradient(90deg,var(--purple2),var(--gold));
+  transition:width .8s cubic-bezier(.4,0,.2,1);
+  box-shadow:0 0 6px rgba(160,128,208,.3);
+}
+.xp-strip-val{font-size:10px;color:var(--text3);white-space:nowrap;}
+
+/* セクションラベル：細い魔法線 */
+.sec-label{
+  font-size:9px;color:var(--text3);
+  letter-spacing:.14em;text-transform:uppercase;
+  margin-bottom:8px;
+  display:flex;align-items:center;gap:8px;
+}
+.sec-label::before,.sec-label::after{
+  content:'';height:1px;flex:1;
+  background:linear-gradient(90deg,transparent,var(--border2));
+}
+.sec-label::after{background:linear-gradient(90deg,var(--border2),transparent);}
+
+/* チェックアイテム */
+.check-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;
+  border-radius:9px;cursor:pointer;
+  border:1px solid var(--border);
+  background:var(--surface2);
+  margin-bottom:5px;
+  transition:all .15s;
+  position:relative;overflow:hidden;
+}
+.check-item:hover{border-color:var(--border2);background:var(--surface3);}
+.check-item.done{opacity:.38;}
+.check-item.done .ci-text{text-decoration:line-through;color:var(--text3);}
+.check-item.completing{animation:ciPop .3s cubic-bezier(.2,1.4,.4,1);}
+@keyframes ciPop{0%{transform:scale(1);}50%{transform:scale(1.015);border-color:var(--gold);}100%{transform:scale(1);}}
+.ci-check{
+  width:17px;height:17px;
+  border:1px solid var(--border2);
+  border-radius:4px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .2s;
+}
+.check-item.done .ci-check{background:var(--teal2);border-color:var(--teal2);}
+.check-item.done .ci-check::after{content:'';width:8px;height:5px;border-left:1.5px solid #fff;border-bottom:1.5px solid #fff;transform:rotate(-45deg) translateY(-1px);display:block;}
+.ci-text{flex:1;font-size:13px;color:var(--text);line-height:1.4;}
+.ci-gold{font-size:9px;color:var(--gold);opacity:.55;}
+
+/* 追加フォーム */
+.add-strip{display:flex;gap:7px;margin-top:12px;}
+.add-input{
+  flex:1;background:var(--surface3);
+  border:1px solid var(--border);border-radius:8px;
+  padding:8px 11px;color:var(--text);
+  font-size:13px;font-family:'Noto Sans JP',sans-serif;
+}
+.add-input::placeholder{color:var(--text3);}
+.add-input:focus{outline:none;border-color:var(--border2);box-shadow:0 0 0 2px var(--gold-glow);}
+.add-select{
+  background:var(--surface3);border:1px solid var(--border);
+  border-radius:8px;padding:8px;
+  color:var(--text2);font-size:11px;font-family:'Noto Sans JP',sans-serif;
+}
+.add-btn{
+  padding:8px 13px;border-radius:8px;
+  border:1px solid var(--gold);background:transparent;
+  color:var(--gold2);cursor:pointer;font-size:13px;
+  transition:all .15s;
+}
+.add-btn:hover{background:rgba(160,120,48,.1);box-shadow:var(--glow-gold);}
+
+/* ── プロジェクトログ ── */
+.proj-stat-card{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:8px;padding:9px 10px;text-align:center;
+}
+.proj-stat-label{font-size:9px;color:var(--text3);margin-bottom:3px;letter-spacing:.06em;}
+.proj-stat-val{font-size:18px;font-weight:500;color:var(--gold2);}
+.proj-stat-sub{font-size:9px;color:var(--text3);margin-top:1px;}
+
+/* プロジェクトカード：時間を感じる細い魔法線 */
+.proj-card{
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:12px;padding:15px;
+  margin-bottom:10px;
+  position:relative;overflow:hidden;
+  transition:border-color .2s;
+}
+.proj-card:hover{border-color:var(--border2);}
+.proj-card.completed{opacity:.45;}
+.proj-card-accent{
+  position:absolute;left:0;top:0;bottom:0;width:2px;
+  border-radius:2px 0 0 2px;
+}
+/* 魔法陣ライン：プロジェクト進行を感じる微細装飾 */
+.proj-card::before{
+  content:'';
+  position:absolute;right:12px;top:12px;
+  width:40px;height:40px;
+  border-radius:50%;
+  border:1px solid var(--border-glow);
+  opacity:.4;
+  pointer-events:none;
+}
+.proj-header{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;}
+.proj-name{flex:1;font-size:13px;font-weight:500;color:var(--text);line-height:1.4;}
+.proj-status-badge{font-size:9px;padding:2px 8px;border-radius:8px;font-weight:500;flex-shrink:0;letter-spacing:.03em;}
+.proj-dates{font-size:10px;color:var(--text3);margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+
+/* タイムラインバー：魔法的な時間表現 */
+.proj-timeline{margin-bottom:12px;}
+.proj-tl-head{display:flex;justify-content:space-between;font-size:9px;color:var(--text3);margin-bottom:5px;letter-spacing:.03em;}
+.proj-tl-track{
+  height:6px;background:var(--surface3);
+  border-radius:3px;position:relative;overflow:visible;
+}
+.proj-tl-past{
+  position:absolute;left:0;top:0;height:100%;
+  border-radius:3px;background:rgba(90,63,138,.3);
+}
+.proj-tl-progress{
+  position:absolute;top:0;height:100%;
+  border-radius:3px;
+  transition:width .5s;
+}
+/* 今日ライン：金の発光 */
+.proj-tl-today{
+  position:absolute;top:-4px;bottom:-4px;
+  width:1.5px;border-radius:1px;
+  background:var(--gold2);
+  box-shadow:0 0 5px rgba(200,160,80,.5),0 0 10px rgba(200,160,80,.2);
+  z-index:3;
+}
+.proj-tl-today::after{
+  content:'今日';
+  position:absolute;top:-16px;left:50%;
+  transform:translateX(-50%);
+  font-size:8px;color:var(--gold2);
+  white-space:nowrap;letter-spacing:.03em;
+}
+.proj-tl-info{
+  display:flex;align-items:center;gap:10px;
+  margin-top:6px;font-size:10px;color:var(--text3);
+}
+.proj-tl-info-item{display:flex;align-items:center;gap:4px;}
+.proj-tl-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+
+/* 進捗コントロール */
+.proj-ctrl{
+  display:flex;align-items:center;gap:8px;
+  padding-top:11px;
+  border-top:1px solid rgba(58,48,96,.4);
+}
+.proj-pct-wrap{min-width:44px;}
+.proj-pct{font-size:18px;font-weight:500;color:var(--gold2);}
+.proj-pct-sub{font-size:9px;color:var(--text3);}
+.proj-btns{display:flex;gap:5px;margin-left:auto;flex-wrap:wrap;justify-content:flex-end;}
+.proj-btn{
+  padding:5px 10px;border-radius:6px;
+  border:1px solid var(--border);background:transparent;
+  color:var(--text2);cursor:pointer;font-size:10px;
+  font-family:'Noto Sans JP',sans-serif;transition:all .1s;
+}
+.proj-btn:hover{background:var(--surface3);border-color:var(--border2);}
+.proj-btn.fwd{border-color:rgba(160,120,48,.5);color:var(--gold2);}
+.proj-btn.fwd:hover{background:rgba(160,120,48,.1);}
+.proj-btn.complete{border-color:rgba(42,128,112,.5);color:var(--teal2);}
+.proj-btn.complete:hover{background:rgba(42,128,112,.1);}
+
+/* 追加フォーム */
+.proj-add-form{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:12px;padding:14px;margin-top:6px;
+}
+.form-label{font-size:10px;color:var(--text2);margin-bottom:7px;letter-spacing:.06em;}
+.form-input{
+  width:100%;background:var(--surface3);
+  border:1px solid var(--border);border-radius:7px;
+  padding:8px 10px;color:var(--text);
+  font-size:13px;font-family:'Noto Sans JP',sans-serif;
+  margin-bottom:8px;
+}
+.form-input:focus{outline:none;border-color:var(--border2);}
+.form-input::placeholder{color:var(--text3);}
+.form-row{display:flex;gap:8px;margin-bottom:8px;}
+.form-row .form-input{margin-bottom:0;flex:1;}
+.submit-btn{
+  width:100%;padding:9px;border-radius:8px;
+  border:1px solid var(--gold);background:transparent;
+  color:var(--gold2);cursor:pointer;font-size:12px;
+  font-family:'Noto Sans JP',sans-serif;transition:all .15s;
+}
+.submit-btn:hover{background:rgba(160,120,48,.1);}
+
+/* ── 月の誓い ── */
+.vow-page-header{
+  text-align:center;
+  padding:20px 16px 16px;
+  position:relative;
+}
+/* 薄い紋章：背景装飾 */
+.vow-page-header::before{
+  content:'';
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:160px;height:160px;
+  border-radius:50%;
+  border:1px solid rgba(160,120,48,.1);
+  pointer-events:none;
+}
+.vow-page-header::after{
+  content:'';
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:120px;height:120px;
+  border-radius:50%;
+  border:1px solid rgba(160,120,48,.07);
+  pointer-events:none;
+}
+.vow-month-title{
+  font-family:'Cinzel',serif;font-size:15px;
+  color:var(--gold2);letter-spacing:.2em;
+  margin-bottom:6px;position:relative;
+}
+.vow-page-sub{
+  font-size:11px;color:var(--text3);
+  line-height:1.7;position:relative;
+}
+
+/* 誓いカード：背景に薄い紋章 */
+.vow-card{
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:16px 18px;
+  margin-bottom:9px;
+  position:relative;
+  overflow:hidden;
+  transition:border-color .2s;
+}
+.vow-card:hover{border-color:var(--border2);}
+.vow-card.fulfilled{opacity:.42;}
+/* 薄い紋章装飾 */
+.vow-card::before{
+  content:'';
+  position:absolute;right:-16px;bottom:-16px;
+  width:64px;height:64px;
+  border-radius:50%;
+  border:1px solid var(--border-glow);
+  pointer-events:none;
+  opacity:.5;
+}
+.vow-card::after{
+  content:'';
+  position:absolute;right:-8px;bottom:-8px;
+  width:44px;height:44px;
+  border-radius:50%;
+  border:1px solid var(--border-glow);
+  pointer-events:none;
+  opacity:.3;
+}
+.vow-accent{
+  position:absolute;left:0;top:14px;bottom:14px;
+  width:2px;border-radius:0 2px 2px 0;
+  opacity:.7;
+}
+.vow-text{
+  font-size:14px;color:var(--text);
+  line-height:1.8;margin-bottom:11px;
+  padding-left:2px;
+}
+.vow-actions{display:flex;align-items:center;gap:8px;}
+.vow-fulfill-btn{
+  padding:4px 13px;border-radius:20px;
+  border:1px solid var(--border2);background:transparent;
+  color:var(--text3);cursor:pointer;font-size:10px;
+  font-family:'Noto Sans JP',sans-serif;transition:all .15s;
+  letter-spacing:.03em;
+}
+.vow-fulfill-btn:hover{border-color:var(--teal2);color:var(--teal2);}
+.vow-fulfill-btn.fulfilled{border-color:var(--teal2);color:var(--teal2);background:rgba(42,128,112,.08);}
+.vow-date{font-size:9px;color:var(--text3);margin-left:6px;}
+.vow-delete-btn{margin-left:auto;background:none;border:none;color:var(--text3);cursor:pointer;font-size:11px;opacity:.4;transition:opacity .15s;}
+.vow-delete-btn:hover{opacity:.8;color:var(--red2);}
+
+/* 誓いフォーム */
+.vow-form{
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:12px;padding:15px;
+  margin-top:14px;
+}
+.vow-form-label{font-size:10px;color:var(--text2);letter-spacing:.08em;margin-bottom:9px;}
+.vow-textarea{
+  width:100%;background:var(--surface3);
+  border:1px solid var(--border);border-radius:8px;
+  padding:10px 12px;color:var(--text);
+  font-size:13px;font-family:'Noto Sans JP',sans-serif;
+  resize:none;line-height:1.8;min-height:72px;
+}
+.vow-textarea:focus{outline:none;border-color:var(--border2);}
+.vow-textarea::placeholder{color:var(--text3);}
+.vow-color-row{display:flex;gap:8px;margin:9px 0;align-items:center;}
+.vow-color-label{font-size:10px;color:var(--text3);}
+.vow-color-btn{width:16px;height:16px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:all .12s;opacity:.7;}
+.vow-color-btn:hover{opacity:1;}
+.vow-color-btn.selected{border-color:rgba(255,255,255,.5);transform:scale(1.2);opacity:1;}
+.vow-submit{
+  width:100%;padding:9px;border-radius:8px;
+  border:1px solid var(--gold);background:transparent;
+  color:var(--gold2);cursor:pointer;font-size:11px;
+  font-family:'Cinzel',serif;letter-spacing:.12em;
+  margin-top:5px;transition:all .15s;
+}
+.vow-submit:hover{background:rgba(160,120,48,.1);box-shadow:var(--glow-gold);}
+
+/* ── PDCA ── */
+.week-nav{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.week-nav-btn{padding:6px 12px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;font-size:14px;transition:all .1s;}
+.week-nav-btn:hover{background:var(--surface3);}
+.week-title-text{flex:1;text-align:center;font-size:13px;color:var(--text);font-weight:500;}
+.week-sub{font-size:10px;color:var(--text3);text-align:center;display:block;margin-top:2px;}
+.pdca-section{margin-bottom:16px;}
+.pdca-header{display:flex;align-items:center;gap:8px;margin-bottom:9px;}
+.pdca-badge{font-family:'Cinzel',serif;font-size:10px;padding:3px 10px;border-radius:20px;font-weight:600;letter-spacing:.1em;}
+.pdca-badge.p{background:rgba(90,63,138,.2);color:var(--purple3);border:1px solid rgba(90,63,138,.4);}
+.pdca-badge.d{background:rgba(26,90,80,.2);color:var(--teal2);border:1px solid rgba(26,90,80,.4);}
+.pdca-badge.c{background:rgba(160,120,48,.15);color:var(--gold2);border:1px solid rgba(160,120,48,.35);}
+.pdca-badge.a{background:rgba(122,32,48,.2);color:#d06070;border:1px solid rgba(122,32,48,.4);}
+.pdca-desc{font-size:10px;color:var(--text3);}
+.kpi-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px;}
+.kpi-top{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.kpi-name{flex:1;font-size:12px;font-weight:500;color:var(--text);}
+.kpi-unit-label{font-size:10px;color:var(--text3);}
+.kpi-nums{display:flex;align-items:baseline;gap:4px;margin-bottom:7px;}
+.kpi-current{font-size:22px;font-weight:500;color:var(--gold2);}
+.kpi-target-label{font-size:11px;color:var(--text3);}
+.kpi-track{height:3px;background:var(--surface3);border-radius:2px;margin-bottom:8px;}
+.kpi-bar{height:3px;border-radius:2px;transition:width .4s;}
+.kpi-input-row{display:flex;gap:7px;align-items:center;}
+.kpi-input{width:80px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;padding:6px 8px;color:var(--text);font-size:13px;font-family:'Noto Sans JP',sans-serif;text-align:center;}
+.kpi-input:focus{outline:none;border-color:var(--border2);}
+.kpi-set-btn{padding:6px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;font-size:11px;font-family:'Noto Sans JP',sans-serif;}
+.kpi-set-btn:hover{background:var(--surface3);}
+.kpi-status{font-size:10px;margin-left:auto;}
+.kpi-status.over{color:var(--teal2);}
+.kpi-status.danger{color:var(--red2);}
+.retro-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px;}
+.retro-textarea{width:100%;background:var(--surface3);border:1px solid var(--border);border-radius:7px;padding:8px 10px;color:var(--text);font-size:12px;font-family:'Noto Sans JP',sans-serif;resize:none;line-height:1.7;}
+.retro-textarea:focus{outline:none;border-color:var(--border2);}
+.retro-textarea::placeholder{color:var(--text3);}
+.kpi-add-form{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-top:8px;}
+
+/* ── SPIRIT ── */
+.spirit-main{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:14px;padding:20px;text-align:center;margin-bottom:14px;
+  position:relative;overflow:hidden;
+}
+/* 精霊カード：薄い魔法陣 */
+.spirit-main::before{
+  content:'';
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:140px;height:140px;border-radius:50%;
+  border:1px solid var(--border-glow);
+  pointer-events:none;animation:spiritRingPulse 4s ease-in-out infinite;
+}
+.spirit-main::after{
+  content:'';
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:100px;height:100px;border-radius:50%;
+  border:1px solid rgba(160,128,208,.1);
+  pointer-events:none;animation:spiritRingPulse 4s ease-in-out infinite .5s;
+}
+@keyframes spiritRingPulse{0%,100%{opacity:.5;}50%{opacity:.15;}}
+.spirit-type-badge{display:inline-block;font-size:10px;padding:3px 11px;border-radius:20px;margin-bottom:12px;font-weight:500;letter-spacing:.04em;}
+.spirit-info-name{font-size:17px;font-weight:500;color:var(--gold3);margin-top:10px;}
+.spirit-info-status{font-size:11px;color:var(--text2);margin-top:3px;}
+.spirit-info-lv{font-size:10px;color:var(--text3);margin-top:2px;}
+.stages-wrap{display:flex;gap:6px;justify-content:center;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);}
+.stage-item{text-align:center;flex:1;}
+.stage-label{font-size:9px;color:var(--text3);margin-top:3px;}
+.stage-item.active .stage-label{color:var(--gold2);}
+.spirit-bars{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:12px;}
+.bar-row{display:flex;align-items:center;gap:9px;margin-bottom:7px;}
+.bar-row:last-child{margin-bottom:0;}
+.bar-label{font-size:10px;color:var(--text2);width:50px;flex-shrink:0;}
+.bar-track{flex:1;height:3px;background:var(--surface3);border-radius:2px;}
+.bar-fill{height:3px;border-radius:2px;transition:width .5s;}
+.bar-val{font-size:10px;color:var(--text3);min-width:28px;text-align:right;}
+.type-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:14px;}
+.type-card{background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:8px 4px;text-align:center;cursor:pointer;transition:all .12s;}
+.type-card:hover{border-color:var(--border2);background:var(--surface3);}
+.type-card.selected{border-width:2px;}
+.type-card-name{font-size:11px;font-weight:500;margin-top:4px;}
+.type-card-desc{font-size:9px;color:var(--text3);margin-top:1px;}
+.name-input-wrap{background:var(--surface2);border:1px solid var(--border);border-radius:11px;padding:13px;margin-bottom:14px;}
+.name-label{font-size:10px;color:var(--text2);margin-bottom:6px;}
+.name-input{width:100%;background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:9px 13px;color:var(--text);font-size:15px;font-family:'Noto Sans JP',sans-serif;text-align:center;}
+.name-input:focus{outline:none;border-color:var(--border2);}
+.name-input::placeholder{color:var(--text3);}
+.confirm-btn{width:100%;padding:11px;border-radius:10px;border:1px solid var(--gold);background:transparent;color:var(--gold2);cursor:pointer;font-size:12px;font-family:'Cinzel',serif;letter-spacing:.12em;margin-bottom:10px;transition:all .15s;}
+.confirm-btn:hover{background:rgba(160,120,48,.1);box-shadow:var(--glow-gold);}
+.sim-wrap{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:12px;}
+.sim-label{font-size:10px;color:var(--text2);margin-bottom:8px;}
+.sim-btns{display:flex;gap:6px;flex-wrap:wrap;}
+.sim-btn{padding:5px 10px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;font-size:11px;font-family:'Noto Sans JP',sans-serif;}
+.sim-btn:hover{background:var(--surface3);}
+.sim-btn.danger{border-color:rgba(122,32,48,.5);color:#d06070;}
+.sim-btn.success{border-color:rgba(26,90,80,.5);color:var(--teal2);}
+
+/* ── 待機中クエスト ── */
+.backlog-section{margin-bottom:14px;}
+.backlog-sec-label{font-size:9px;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:7px;}
+.backlog-item{display:flex;align-items:flex-start;gap:9px;padding:7px 9px;border-radius:7px;border:1px solid transparent;margin-bottom:3px;transition:all .1s;}
+.backlog-item:hover{background:var(--surface2);border-color:var(--border);}
+.bl-dot{width:3px;height:3px;border-radius:50%;background:var(--border2);flex-shrink:0;margin-top:7px;}
+
+/* ── つきよバー ── */
+.tsukiyo-bar{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:12px;padding:12px 14px;margin-bottom:14px;
+  display:flex;gap:11px;align-items:flex-start;
+  position:relative;overflow:hidden;
+}
+.tsukiyo-bar::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--border-glow),transparent);
+}
+.tsukiyo-name{font-size:10px;color:var(--purple3);margin-bottom:3px;font-weight:500;letter-spacing:.04em;}
+.tsukiyo-msg{font-size:12px;color:var(--text2);line-height:1.6;}
+
+/* ── 精霊ミニ ── */
+.spirit-mini{position:fixed;bottom:20px;right:14px;z-index:30;cursor:pointer;}
+.spirit-mini-inner{
+  width:50px;height:50px;
+  background:rgba(22,18,40,.9);
+  border:1px solid var(--border2);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .3s;
+  box-shadow:0 4px 16px rgba(0,0,0,.5),var(--glow-purple);
+  backdrop-filter:blur(4px);
+}
+.spirit-mini-inner:hover{border-color:var(--purple3);}
+.spirit-mini-inner.bounce{animation:spiritBounce .5s cubic-bezier(.2,1.5,.4,1);}
+@keyframes spiritBounce{0%{transform:scale(1);}40%{transform:scale(1.18) translateY(-3px);}70%{transform:scale(.96);}100%{transform:scale(1);}}
+.spirit-mini-inner.glow-anim{animation:spiritGlow 1.8s ease-in-out;}
+@keyframes spiritGlow{0%{box-shadow:0 4px 16px rgba(0,0,0,.5);}50%{box-shadow:0 0 16px rgba(200,160,80,.3),0 0 32px rgba(200,160,80,.15);}100%{box-shadow:0 4px 16px rgba(0,0,0,.5);}}
+
+/* ── 演出 ── */
+.dust-particle{position:fixed;pointer-events:none;z-index:200;border-radius:50%;animation:dustFloat linear forwards;}
+@keyframes dustFloat{0%{opacity:.8;transform:translate(0,0) scale(1);}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(0);}}
+.float-label{position:fixed;pointer-events:none;z-index:200;font-size:11px;font-weight:500;animation:labelFloat .9s ease-out forwards;}
+@keyframes labelFloat{0%{opacity:1;transform:translateY(0);}100%{opacity:0;transform:translateY(-40px);}}
+.float-gold{color:var(--gold2);}
+.float-exp{color:var(--purple3);}
+
+/* バナー：静かに出てくる */
+.complete-banner{
+  position:fixed;top:60px;left:50%;
+  transform:translateX(-50%) translateY(-50px);
+  background:rgba(22,18,40,.95);
+  border:1px solid rgba(160,120,48,.4);
+  border-radius:8px;padding:7px 16px;
+  font-size:11px;color:var(--text2);
+  z-index:150;
+  transition:transform .4s cubic-bezier(.2,1.4,.4,1),opacity .3s;
+  opacity:0;white-space:nowrap;
+  backdrop-filter:blur(8px);
+}
+.complete-banner.show{transform:translateX(-50%) translateY(0);opacity:1;}
+.cb-gold{color:var(--gold2);font-weight:500;}
+
+/* ALL CLEAR */
+.all-clear{
+  position:fixed;top:0;left:0;right:0;bottom:0;
+  background:rgba(8,6,18,.92);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  z-index:200;opacity:0;pointer-events:none;transition:opacity .5s;
+}
+.all-clear.show{opacity:1;pointer-events:all;}
+.ac-inner{text-align:center;padding:32px;position:relative;}
+/* ALL CLEAR：薄い魔法陣 */
+.ac-inner::before{
+  content:'';position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:200px;height:200px;border-radius:50%;
+  border:1px solid rgba(160,120,48,.15);
+  animation:acRingExpand 1.5s ease-out forwards;
+}
+@keyframes acRingExpand{0%{transform:translate(-50%,-50%) scale(.5);opacity:0;}100%{transform:translate(-50%,-50%) scale(1);opacity:1;}}
+.ac-title{
+  font-family:'Cinzel',serif;font-size:20px;
+  color:var(--gold2);letter-spacing:.25em;
+  margin-bottom:8px;
+  animation:acTitleFade 1s ease-out .3s both;
+}
+@keyframes acTitleFade{0%{opacity:0;transform:translateY(8px);}100%{opacity:1;transform:translateY(0);}}
+.ac-sub{font-size:12px;color:var(--text2);margin-bottom:16px;line-height:1.7;letter-spacing:.03em;}
+.ac-reward{font-size:14px;color:var(--gold2);margin-bottom:20px;}
+.ac-btn{
+  padding:10px 24px;border-radius:8px;
+  border:1px solid var(--gold);background:transparent;
+  color:var(--gold2);cursor:pointer;font-size:12px;
+  font-family:'Cinzel',serif;letter-spacing:.12em;
+  transition:all .15s;
+}
+.ac-btn:hover{background:rgba(160,120,48,.1);}
+.stars-wrap{position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;overflow:hidden;}
+.star{position:absolute;border-radius:50%;animation:starFall linear forwards;}
+@keyframes starFall{0%{opacity:.8;transform:translateY(-10px);}100%{opacity:0;transform:translateY(110vh);}}
+
+.levelup-banner{
+  position:fixed;top:60px;left:50%;
+  transform:translateX(-50%) translateY(-80px);
+  background:rgba(22,18,40,.95);
+  border:1px solid rgba(160,120,48,.4);
+  border-radius:8px;padding:8px 18px;
+  font-size:11px;color:var(--gold2);
+  font-family:'Cinzel',serif;letter-spacing:.12em;
+  z-index:150;
+  transition:transform .4s cubic-bezier(.2,1.4,.4,1),opacity .3s;
+  opacity:0;backdrop-filter:blur(8px);
+}
+.levelup-banner.show{transform:translateX(-50%) translateY(0);opacity:1;}
+.divider{height:1px;background:var(--border);margin:13px 0;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <svg width="24" height="24" viewBox="0 0 32 32">
+    <polygon points="16,3 29,10 29,22 16,29 3,22 3,10" fill="none" stroke="#a07830" stroke-width="1"/>
+    <polygon points="16,7 25,12 25,20 16,25 7,20 7,12" fill="rgba(90,63,138,.2)" stroke="rgba(90,63,138,.4)" stroke-width=".8"/>
+    <circle cx="16" cy="16" r="2.5" fill="#a07830"/>
+    <circle cx="16" cy="16" r="1.2" fill="#e8c87a"/>
+  </svg>
+  <div>
+    <div class="logo">SAVE POINT<span class="logo-sub">SKILLBASE</span></div>
+  </div>
+  <div class="header-right">
+    <div class="gold-badge" id="gold-badge">&#9670; <span id="gold-val">320</span>G</div>
+    <div class="lv-badge">Lv.<span id="lv-val">7</span></div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('today',this)">今日</div>
+  <div class="tab" onclick="showTab('proj',this)">プロジェクトログ</div>
+  <div class="tab" onclick="showTab('vow',this)">月の誓い</div>
+  <div class="tab" onclick="showTab('pdca',this)">週PDCA</div>
+  <div class="tab" onclick="showTab('spirit',this)">精霊</div>
+  <div class="tab" onclick="showTab('backlog',this)">待機中クエスト</div>
+</div>
+
+<!-- TODAY -->
+<div class="view active" id="view-today">
+  <div class="day-header">
+    <div class="day-date" id="day-date"></div>
+    <div class="day-streak">
+      <span style="font-size:10px;color:var(--gold)">&#9670;</span>
+      <span class="streak-num" id="streak-num">3</span>
+      <span class="streak-label">日連続</span>
+    </div>
+  </div>
+
+  <div class="today-summary">
+    <svg width="52" height="52" viewBox="0 0 52 52" style="flex-shrink:0;">
+      <circle class="ring-track" cx="26" cy="26" r="20"/>
+      <circle class="ring-fill" cx="26" cy="26" r="20" stroke-dasharray="125.7" id="ring-fill" stroke-dashoffset="125.7"/>
+      <text x="26" y="30" text-anchor="middle" fill="#c8a050" font-size="10" font-weight="500" font-family="Noto Sans JP,sans-serif" id="ring-pct">0%</text>
+    </svg>
+    <div class="today-text">
+      <div class="today-done-num"><span id="done-num">0</span><span style="font-size:13px;color:var(--text3)"> / <span id="total-num">0</span></span></div>
+      <div class="today-done-sub">今日のクエスト</div>
+      <div class="today-msg" id="today-msg">今日もここから始めようにゃ。</div>
+    </div>
+  </div>
+
+  <div class="xp-strip">
+    <div class="xp-strip-label">EXP · Lv.<span id="xp-lv">7</span></div>
+    <div class="xp-strip-track"><div class="xp-strip-fill" id="xp-fill" style="width:48%"></div></div>
+    <div class="xp-strip-val"><span id="xp-cur">240</span> / 500</div>
+  </div>
+
+  <div id="today-quests"></div>
+
+  <div class="add-strip">
+    <input type="text" class="add-input" id="new-q" placeholder="クエストを刻む..." onkeydown="if(event.key==='Enter')addTodayQuest()"/>
+    <select class="add-select" id="new-q-sec">
+      <option value="main">今日</option>
+      <option value="routine">日次</option>
+      <option value="life">生活</option>
+    </select>
+    <button class="add-btn" onclick="addTodayQuest()">+</button>
+  </div>
+</div>
+
+<!-- プロジェクトログ -->
+<div class="view" id="view-proj">
+  <div class="tsukiyo-bar">
+    <svg width="40" height="40" viewBox="0 0 44 44" style="flex-shrink:0;opacity:.9;">
+      <circle cx="22" cy="22" r="20" fill="#0f0c1a" stroke="rgba(90,63,138,.5)" stroke-width="1.5"/>
+      <ellipse cx="22" cy="26" rx="11" ry="9" fill="#0a0814"/>
+      <ellipse cx="22" cy="20" rx="10" ry="11" fill="#130f22"/>
+      <polygon points="14,12 11,4 18,10" fill="#130f22"/>
+      <polygon points="30,12 33,4 26,10" fill="#130f22"/>
+      <circle cx="18" cy="20" r="3" fill="#8a3a10"/><circle cx="26" cy="20" r="3" fill="#8a3a10"/>
+      <circle cx="18" cy="20" r="1.5" fill="#c06030"/><circle cx="26" cy="20" r="1.5" fill="#c06030"/>
+      <path d="M19 26 Q22 28 25 26" stroke="var(--purple2)" stroke-width="1" fill="none" stroke-linecap="round"/>
+    </svg>
+    <div>
+      <div class="tsukiyo-name">つきよ</div>
+      <div class="tsukiyo-msg">締切まであと何日、今どこまで進んでいるか。それだけを見ればいいにゃ。</div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:14px;">
+    <div class="proj-stat-card"><div class="proj-stat-label">ACTIVE</div><div class="proj-stat-val" id="ps-active">0</div><div class="proj-stat-sub">進行中</div></div>
+    <div class="proj-stat-card"><div class="proj-stat-label">URGENT</div><div class="proj-stat-val" id="ps-urgent" style="color:var(--red2);">0</div><div class="proj-stat-sub">7日以内</div></div>
+    <div class="proj-stat-card"><div class="proj-stat-label">DONE</div><div class="proj-stat-val" id="ps-done">0</div><div class="proj-stat-sub">完了</div></div>
+  </div>
+  <div id="proj-cards"></div>
+  <div class="proj-add-form">
+    <div class="form-label">&#9670; 新しいプロジェクトを刻む</div>
+    <input class="form-input" id="pj-name" placeholder="プロジェクト名..." type="text"/>
+    <div class="form-row">
+      <input class="form-input" id="pj-start" type="date"/>
+      <input class="form-input" id="pj-end" type="date"/>
+    </div>
+    <button class="submit-btn" onclick="addProject()">&#9670; 刻む</button>
+  </div>
+</div>
+
+<!-- 月の誓い -->
+<div class="view" id="view-vow">
+  <div class="vow-page-header">
+    <div class="vow-month-title" id="vow-month-title">2026年5月</div>
+    <div class="vow-page-sub">今月どう在りたいか。<br>数値ではなく、意思を刻む場所。</div>
+  </div>
+  <div id="vow-cards"></div>
+  <div class="vow-form">
+    <div class="vow-form-label">&#9670; 誓いを刻む</div>
+    <textarea class="vow-textarea" id="vow-input" rows="3" placeholder="例：朝を丁寧に始める&#10;例：出品を止めない&#10;例：撮影に真剣に向き合う"></textarea>
+    <div class="vow-color-row">
+      <span class="vow-color-label">色：</span>
+      <div class="vow-color-btn selected" style="background:#8060b0;" data-color="#8060b0" onclick="selectVowColor(this)"></div>
+      <div class="vow-color-btn" style="background:#2a8070;" data-color="#2a8070" onclick="selectVowColor(this)"></div>
+      <div class="vow-color-btn" style="background:#a07830;" data-color="#a07830" onclick="selectVowColor(this)"></div>
+      <div class="vow-color-btn" style="background:#c04050;" data-color="#c04050" onclick="selectVowColor(this)"></div>
+      <div class="vow-color-btn" style="background:#185FA5;" data-color="#185FA5" onclick="selectVowColor(this)"></div>
+    </div>
+    <button class="vow-submit" onclick="addVow()">&#9670; 刻む &#9670;</button>
+  </div>
+</div>
+
+<!-- PDCA -->
+<div class="view" id="view-pdca">
+  <div class="week-nav">
+    <button class="week-nav-btn" onclick="changeWeek(-1)">&#8249;</button>
+    <div><div class="week-title-text" id="week-title">第2週</div><span class="week-sub" id="week-range">5/11〜5/17</span></div>
+    <button class="week-nav-btn" onclick="changeWeek(1)">&#8250;</button>
+  </div>
+  <div class="pdca-section">
+    <div class="pdca-header"><div class="pdca-badge p">PLAN</div><div class="pdca-desc">今週の数値目標を設定</div></div>
+    <div id="kpi-list"></div>
+    <div class="kpi-add-form">
+      <div class="form-label" style="font-size:10px;color:var(--text2);margin-bottom:6px;">&#9670; KPIを追加</div>
+      <input class="form-input" id="kpi-name" placeholder="KPI名（例：メルカリ売上）" type="text"/>
+      <div class="form-row" style="margin-bottom:8px;">
+        <input class="form-input" id="kpi-target" placeholder="目標値" type="number" style="flex:1;margin-bottom:0;"/>
+        <input class="form-input" id="kpi-unit" placeholder="単位" type="text" style="flex:1;margin-bottom:0;"/>
+      </div>
+      <button class="submit-btn" onclick="addKPI()">KPIを刻む</button>
+    </div>
+  </div>
+  <div class="divider"></div>
+  <div class="pdca-section">
+    <div class="pdca-header"><div class="pdca-badge c">CHECK</div><div class="pdca-desc">現在値を入力して進捗確認</div></div>
+    <div id="kpi-check-list"></div>
+  </div>
+  <div class="divider"></div>
+  <div class="pdca-section">
+    <div class="pdca-header"><div class="pdca-badge d">DO</div><div class="pdca-desc">今週やったこと・気づき</div></div>
+    <div class="retro-card"><textarea class="retro-textarea" id="memo-do" rows="3" placeholder="今週実行したこと、気づいたことを刻む..." oninput="saveMemo()"></textarea></div>
+  </div>
+  <div class="pdca-section">
+    <div class="pdca-header"><div class="pdca-badge a">ACT</div><div class="pdca-desc">来週に活かすこと</div></div>
+    <div class="retro-card"><textarea class="retro-textarea" id="memo-act" rows="3" placeholder="来週に活かすこと、改善したいことを刻む..." oninput="saveMemo()"></textarea></div>
+  </div>
+</div>
+
+<!-- SPIRIT -->
+<div class="view" id="view-spirit">
+  <div id="spirit-select">
+    <div style="font-size:10px;color:var(--text2);letter-spacing:.1em;margin-bottom:10px;">&#9670; 精霊のタイプを選ぶ</div>
+    <div class="type-grid" id="type-grid"></div>
+    <div class="name-input-wrap"><div class="name-label">&#9670; 精霊に名前をつける</div><input class="name-input" id="spirit-name-input" type="text" placeholder="名前を刻んでください..." maxlength="12"/></div>
+    <button class="confirm-btn" onclick="confirmSpirit()">&#9670; この精霊と契約する &#9670;</button>
+    <div style="font-size:10px;color:var(--text3);text-align:center;">契約には200Gが必要です</div>
+  </div>
+  <div id="spirit-view" style="display:none;">
+    <div class="spirit-main">
+      <div class="spirit-type-badge" id="sp-badge"></div>
+      <div id="sp-display" style="display:flex;justify-content:center;margin:8px 0;position:relative;z-index:1;"></div>
+      <div class="spirit-info-name" id="sp-name"></div>
+      <div class="spirit-info-status" id="sp-status"></div>
+      <div class="spirit-info-lv" id="sp-lv"></div>
+      <div class="stages-wrap" id="sp-stages"></div>
+    </div>
+    <div class="spirit-bars">
+      <div class="bar-row"><div class="bar-label">体力</div><div class="bar-track"><div class="bar-fill" id="b-hp"></div></div><div class="bar-val" id="v-hp"></div></div>
+      <div class="bar-row"><div class="bar-label">輝き</div><div class="bar-track"><div class="bar-fill" id="b-glow"></div></div><div class="bar-val" id="v-glow"></div></div>
+      <div class="bar-row"><div class="bar-label">経験値</div><div class="bar-track"><div class="bar-fill" id="b-exp" style="background:var(--purple2);"></div></div><div class="bar-val" id="v-exp"></div></div>
+    </div>
+    <div class="sim-wrap">
+      <div class="sim-label">&#9670; 状態シミュレーター</div>
+      <div class="sim-btns">
+        <button class="sim-btn success" onclick="simulate('great')">絶好調</button>
+        <button class="sim-btn" onclick="simulate('ok')">元気</button>
+        <button class="sim-btn danger" onclick="simulate('bad')">サボり</button>
+        <button class="sim-btn danger" onclick="simulate('dead')">屍・毒</button>
+        <button class="sim-btn" onclick="simulate('egg')">卵</button>
+      </div>
+    </div>
+    <button class="confirm-btn" onclick="resetSpirit()" style="font-size:11px;border-color:var(--border);color:var(--text2);">&#9670; タイプ・名前を変更する</button>
+  </div>
+</div>
+
+<!-- 待機中クエスト -->
+<div class="view" id="view-backlog">
+  <div class="tsukiyo-bar">
+    <svg width="40" height="40" viewBox="0 0 44 44" style="flex-shrink:0;opacity:.9;">
+      <circle cx="22" cy="22" r="20" fill="#0f0c1a" stroke="rgba(90,63,138,.5)" stroke-width="1.5"/>
+      <ellipse cx="22" cy="26" rx="11" ry="9" fill="#0a0814"/>
+      <ellipse cx="22" cy="20" rx="10" ry="11" fill="#130f22"/>
+      <polygon points="14,12 11,4 18,10" fill="#130f22"/>
+      <polygon points="30,12 33,4 26,10" fill="#130f22"/>
+      <circle cx="18" cy="20" r="3" fill="#8a3a10"/><circle cx="26" cy="20" r="3" fill="#8a3a10"/>
+      <circle cx="18" cy="20" r="1.5" fill="#c06030"/><circle cx="26" cy="20" r="1.5" fill="#c06030"/>
+      <path d="M19 26 Q22 28 25 26" stroke="var(--purple2)" stroke-width="1" fill="none" stroke-linecap="round"/>
+    </svg>
+    <div>
+      <div class="tsukiyo-name">つきよ</div>
+      <div class="tsukiyo-msg">未来の冒険として待機しているクエストにゃ。いつか必ず解放されるにゃよ。</div>
+    </div>
+  </div>
+  <div id="backlog-sections"></div>
+</div>
+
+<!-- OVERLAYS -->
+<div class="all-clear" id="all-clear">
+  <div class="stars-wrap" id="stars-wrap"></div>
+  <div class="ac-inner">
+    <div class="ac-title">ALL CLEAR</div>
+    <div class="ac-sub">全クエスト討伐完了にゃ。<br>今日もよくやったにゃ、パートナー。</div>
+    <div class="ac-reward">&#9670; +100G ボーナス獲得 &#9670;</div>
+    <button class="ac-btn" onclick="closeAllClear()">続ける</button>
+  </div>
+</div>
+<div class="levelup-banner" id="lu-banner">&#9670; LEVEL UP · Lv.<span id="new-lv">8</span> &#9670;</div>
+<div class="complete-banner" id="complete-banner"></div>
+<div class="spirit-mini" onclick="showTab('spirit',document.querySelectorAll('.tab')[4])">
+  <div class="spirit-mini-inner" id="spirit-mini-inner">
+    <svg width="32" height="32" viewBox="0 0 34 34" id="spirit-mini-svg"></svg>
+  </div>
+</div>
+
+<script>
+// ══ CONSTANTS ══
+const NOW=new Date(),TODAY_STR=NOW.toDateString(),SK='savepoint_v9';
+const SPIRIT_TYPES={
+  fire:{name:'炎',color:'#8a2a10',color2:'#c04020',glow:'#e07040',dead:'#602040',badge:'#2a0a08',badgeText:'#c04020',desc:'情熱'},
+  water:{name:'水',color:'#1a4080',color2:'#2060c0',glow:'#6090e0',dead:'#201040',badge:'#080c1e',badgeText:'#2060c0',desc:'癒し'},
+  light:{name:'光',color:'#806010',color2:'#b09020',glow:'#e0c860',dead:'#401850',badge:'#1c1408',badgeText:'#c0a030',desc:'知恵'},
+  dark:{name:'闇',color:'#3a1a70',color2:'#6030a0',glow:'#9060d0',dead:'#182010',badge:'#100818',badgeText:'#7040b0',desc:'秘術'},
+  wind:{name:'風',color:'#0e4030',color2:'#1a6050',glow:'#50a080',dead:'#281860',badge:'#080e0c',badgeText:'#1a6050',desc:'自由'},
+};
+const STATE_LABELS={egg:'卵',great:'絶好調',ok:'元気',bad:'サボり',dead:'屍・毒'};
+const FIXED_QUESTS={
+  main:[
+    {id:'m1',text:'スナラボLP　今日のタスクを進める',sec:'main'},
+    {id:'m2',text:'梶川さん動画編集',sec:'main'},
+    {id:'m3',text:'note完全攻略③視聴',sec:'main'},
+  ],
+  routine:[
+    {id:'r1',text:'不用品出品（1個）',sec:'routine'},
+    {id:'r2',text:'メルカリ個人アカ商品出品',sec:'routine'},
+    {id:'r3',text:'SHOPSいいね回り',sec:'routine'},
+    {id:'r4',text:'ヤフフリいいね回り',sec:'routine'},
+    {id:'r5',text:'星猫パス研修受講',sec:'routine'},
+    {id:'r6',text:'商品発注',sec:'routine'},
+  ],
+  life:[
+    {id:'l1',text:'ゴミ出し',sec:'life'},
+    {id:'l2',text:'洗濯物',sec:'life'},
+    {id:'l3',text:'有酸素運動',sec:'life'},
+    {id:'l4',text:'肩回し・ストレッチ',sec:'life'},
+  ],
+};
+const SEC_CFG={
+  main:{label:'今日やること',color:'var(--purple2)',gold:15,exp:30},
+  routine:{label:'日次収益クエスト',color:'var(--teal2)',gold:10,exp:20},
+  life:{label:'生活・運動クエスト',color:'var(--text3)',gold:5,exp:10},
+};
+const BACKLOG=[
+  {cat:'スギタカメラ',items:['RYOTAさんの撮影日程再設定（夏）']},
+  {cat:'SKILLBASE',items:['シャッターストック利用登録','カメラマン養成講座作成','中国輸入コンテンツ作成','スナラボコンセプトムービー','SKILL BASE誕生秘話作成']},
+  {cat:'開発予定',items:['SHOPS専用ツール開発（スナネコ）','写真基礎ツール開発（ロウ）','マインドハックツール開発（リュオ）','note専用ツール開発（シチリン）']},
+];
+const PROJ_COLORS=['#8060b0','#1D9E75','#c87020','#185FA5','#993556','#a07030','#2a6a5a'];
+const DEF={
+  gold:320,xp:240,lv:7,streak:3,lastDate:'',
+  done:{},extraTasks:[],
+  projects:[
+    {id:'pj1',name:'スナラボLP作成',startDate:'2026-05-01',endDate:'2026-07-31',progress:30,completed:false,color:'#8060b0'},
+    {id:'pj2',name:'ダンジョン作成',startDate:'2026-04-01',endDate:'2026-10-31',progress:20,completed:false,color:'#c87020'},
+    {id:'pj3',name:'物販撮影基礎教材',startDate:'2026-05-10',endDate:'2026-08-31',progress:15,completed:false,color:'#1D9E75'},
+    {id:'pj4',name:'SHOPS専用ツール開発',startDate:'2026-07-01',endDate:'2026-11-30',progress:0,completed:false,color:'#185FA5'},
+  ],
+  vows:[
+    {id:'v1',text:'出品を止めない。毎日一つでも前に進む。',color:'#8060b0',fulfilled:false,date:'5/1'},
+    {id:'v2',text:'撮影に丁寧に向き合う。',color:'#2a8070',fulfilled:false,date:'5/1'},
+    {id:'v3',text:'朝を整える。開幕を大切にする。',color:'#a07830',fulfilled:false,date:'5/1'},
+  ],
+  weeks:{},
+  spirit:{type:'dark',name:'',state:'egg',contracted:false},
+};
+let S={},nextId=1000,spType='dark',weekOffset=0,selectedVowColor='#8060b0';
+
+function load(){
+  try{S=JSON.parse(localStorage.getItem(SK))||{};}catch(e){S={};}
+  S=Object.assign({},DEF,S);
+  if(!S.done)S.done={};if(!S.extraTasks)S.extraTasks=[];
+  if(!S.projects)S.projects=DEF.projects;if(!S.vows)S.vows=DEF.vows;
+  if(!S.weeks)S.weeks={};if(!S.spirit)S.spirit=DEF.spirit;
+  if(S.lastDate!==TODAY_STR){S.done={};S.lastDate=TODAY_STR;save();}
+}
+function save(){try{localStorage.setItem(SK,JSON.stringify(S));}catch(e){}}
+
+function showTab(name,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  el.classList.add('active');
+  if(name==='proj')renderProjects();
+  if(name==='vow'){initVowPage();renderVows();}
+  if(name==='pdca')renderPDCA();
+  if(name==='spirit')renderSpiritView();
+}
+
+// ── TODAY ──
+function initDate(){
+  const days=['日','月','火','水','木','金','土'];
+  document.getElementById('day-date').textContent=`${NOW.getFullYear()}年${NOW.getMonth()+1}月${NOW.getDate()}日（${days[NOW.getDay()]}）`;
+}
+function allTodayQs(){
+  const all=[];
+  for(const[sec,qs] of Object.entries(FIXED_QUESTS)) for(const q of qs) all.push({...q,sec});
+  for(const q of S.extraTasks) all.push(q);
+  return all;
+}
+function calcStats(){
+  const all=allTodayQs();
+  const done=all.filter(q=>!!S.done[q.id]).length;
+  return{done,total:all.length,pct:all.length?Math.round(done/all.length*100):0};
+}
+function updateStats(){
+  const{done,total,pct}=calcStats();
+  document.getElementById('done-num').textContent=done;
+  document.getElementById('total-num').textContent=total;
+  document.getElementById('ring-pct').textContent=pct+'%';
+  const c=125.7,off=c-(pct/100)*c;
+  document.getElementById('ring-fill').style.strokeDashoffset=off;
+  document.getElementById('xp-fill').style.width=Math.min(S.xp/500*100,100)+'%';
+  document.getElementById('xp-cur').textContent=S.xp;
+  document.getElementById('xp-lv').textContent=S.lv;
+  document.getElementById('lv-val').textContent=S.lv;
+  document.getElementById('gold-val').textContent=S.gold;
+  document.getElementById('streak-num').textContent=S.streak;
+  const msgs=pct===100?['全部討伐完了にゃ。今日もよくやったにゃ。']:
+    pct>=60?['いい調子にゃ。この勢いで行こう。']:
+    pct>0?['少しずつでいいにゃ。前進してるにゃよ。']:
+    ['今日もここから始めようにゃ。','さあ、一つ目から行くにゃよ。'];
+  document.getElementById('today-msg').textContent=msgs[0];
+}
+function renderTodayQs(){
+  const secs=['main','routine','life'];
+  let html='';
+  for(const sec of secs){
+    const cfg=SEC_CFG[sec];
+    const fixedQ=FIXED_QUESTS[sec]||[];
+    const extraQ=S.extraTasks.filter(q=>q.sec===sec);
+    const items=[...fixedQ,...extraQ];
+    if(!items.length)continue;
+    html+=`<div style="margin-bottom:14px;">
+      <div class="sec-label">${cfg.label}</div>`;
+    for(const q of items){
+      const done=!!S.done[q.id];
+      html+=`<div class="check-item${done?' done':''}" id="ci_${q.id}" onclick="toggleQ('${q.id}','${sec}')">
+        <div class="ci-check"></div>
+        <span class="ci-text">${q.text}</span>
+        ${!done?`<span class="ci-gold">+${cfg.gold}G</span>`:''}
+      </div>`;
+    }
+    html+='</div>';
+  }
+  document.getElementById('today-quests').innerHTML=html;
+}
+function toggleQ(id,sec){
+  if(S.done[id])return;
+  S.done[id]=true;
+  const cfg=SEC_CFG[sec]||SEC_CFG.life;
+  S.gold+=cfg.gold;S.xp+=cfg.exp;
+  if(S.xp>=500){S.xp-=500;S.lv++;showLevelUp();}
+  const el=document.getElementById('ci_'+id);
+  el&&el.classList.add('completing');
+  spawnDust(window.innerWidth/2,window.innerHeight*.42);
+  spawnLabel(window.innerWidth/2-22,window.innerHeight*.38,'+'+cfg.gold+'G','float-gold');
+  setTimeout(()=>spawnLabel(window.innerWidth/2+18,window.innerHeight*.38+12,'+'+cfg.exp+'EXP','float-exp'),110);
+  popEl('gold-badge');
+  setTimeout(()=>renderTodayQs(),260);
+  save();updateStats();reactSpiritMini();
+  const{done,total}=calcStats();
+  if(done>=total-1)setTimeout(()=>showAllClear(),600);
+}
+function addTodayQuest(){
+  const name=document.getElementById('new-q').value.trim();
+  const sec=document.getElementById('new-q-sec').value;
+  if(!name)return;
+  S.extraTasks.push({id:'ex'+(nextId++),text:name,sec});
+  document.getElementById('new-q').value='';
+  save();renderTodayQs();updateStats();
+}
+
+// ── プロジェクトログ ──
+function dateDiff(a,b){return Math.round((new Date(b)-new Date(a))/(1000*60*60*24));}
+function dateStr(d){const dt=new Date(d);return`${dt.getMonth()+1}/${dt.getDate()}`;}
+function renderProjects(){
+  const todayISO=NOW.toISOString().split('T')[0];
+  let active=0,urgent=0,done=0;
+  let html='';
+  for(const p of S.projects){
+    const totalDays=Math.max(1,dateDiff(p.startDate,p.endDate));
+    const pastDays=Math.max(0,Math.min(dateDiff(p.startDate,todayISO),totalDays));
+    const todayPct=Math.round((pastDays/totalDays)*100);
+    const remaining=dateDiff(todayISO,p.endDate);
+    const isOverdue=remaining<0;
+    const isUrgent=remaining>=0&&remaining<=7;
+    if(!p.completed){active++;if(isUrgent&&!isOverdue)urgent++;}
+    else done++;
+    const color=p.color||'#8060b0';
+    const statusText=p.completed?'完了':isOverdue?`${Math.abs(remaining)}日超過`:isUrgent?`残り${remaining}日`:`残り${remaining}日`;
+    const statusColor=p.completed?'var(--teal2)':isOverdue?'var(--red2)':isUrgent?'var(--red2)':'var(--text3)';
+    const progressColor=color;
+
+    html+=`<div class="proj-card${p.completed?' completed':''}">
+      <div class="proj-card-accent" style="background:${color};"></div>
+      <div class="proj-header">
+        <div class="proj-name">${p.name}</div>
+        <div class="proj-status-badge" style="background:${statusColor}22;color:${statusColor};border:1px solid ${statusColor}44;">${statusText}</div>
+      </div>
+      <div class="proj-dates">
+        <span>${dateStr(p.startDate)}</span>
+        <span style="color:var(--border2);">—</span>
+        <span>${dateStr(p.endDate)}</span>
+        <span style="margin-left:6px;color:var(--text3);">全${totalDays}日</span>
+      </div>
+      <div class="proj-timeline">
+        <div class="proj-tl-head">
+          <span>開始</span>
+          <span style="color:${statusColor};">${statusText}</span>
+          <span>締切</span>
+        </div>
+        <div class="proj-tl-track">
+          <div class="proj-tl-past" style="width:${todayPct}%;"></div>
+          <div class="proj-tl-progress" style="width:${p.progress}%;background:${progressColor};opacity:.7;filter:drop-shadow(0 0 3px ${progressColor}40);"></div>
+          ${!p.completed?`<div class="proj-tl-today" style="left:${Math.min(todayPct,97)}%;"></div>`:''}
+        </div>
+        <div class="proj-tl-info">
+          <div class="proj-tl-info-item">
+            <div class="proj-tl-dot" style="background:${color};"></div>
+            <span>進捗 <strong style="color:var(--gold2);">${p.progress}%</strong></span>
+          </div>
+          <div class="proj-tl-info-item" style="margin-left:10px;">
+            <div class="proj-tl-dot" style="background:var(--gold2);box-shadow:0 0 4px rgba(200,160,80,.5);"></div>
+            <span>時間軸 <strong style="color:var(--gold2);">${todayPct}%</strong></span>
+          </div>
+        </div>
+      </div>
+      ${!p.completed?`
+      <div class="proj-ctrl">
+        <div class="proj-pct-wrap"><div class="proj-pct">${p.progress}%</div><div class="proj-pct-sub">進捗</div></div>
+        <div class="proj-btns">
+          <button class="proj-btn fwd" onclick="advProj('${p.id}',5)">+5%</button>
+          <button class="proj-btn fwd" onclick="advProj('${p.id}',10)">+10%</button>
+          <button class="proj-btn" onclick="advProj('${p.id}',-5)">-5%</button>
+          <button class="proj-btn complete" onclick="completeProj('${p.id}')">討伐完了</button>
+          <button class="proj-btn" onclick="deleteProj('${p.id}')" style="border-color:rgba(122,32,48,.4);color:var(--text3);opacity:.6;" title="削除">✕</button>
+        </div>
+      </div>`:`
+      <div style="display:flex;align-items:center;gap:10px;padding-top:10px;border-top:1px solid rgba(58,48,96,.3);">
+        <div style="font-size:11px;color:var(--teal2);">&#10003; 討伐完了 — お疲れ様でしたにゃ。</div>
+        <button class="proj-btn" onclick="deleteProj('${p.id}')" style="margin-left:auto;border-color:rgba(122,32,48,.4);color:var(--text3);opacity:.6;" title="削除">✕</button>
+      </div>`}
+    </div>`;
+  }
+  document.getElementById('proj-cards').innerHTML=html;
+  document.getElementById('ps-active').textContent=active;
+  document.getElementById('ps-urgent').textContent=urgent;
+  document.getElementById('ps-done').textContent=done;
+}
+function advProj(id,delta){
+  const p=S.projects.find(p=>p.id===id);if(!p)return;
+  p.progress=Math.max(0,Math.min(100,p.progress+delta));
+  if(delta>0){
+    const exp=Math.round(delta/5);
+    S.xp+=exp;if(S.xp>=500){S.xp-=500;S.lv++;showLevelUp();}
+    spawnLabel(window.innerWidth/2-20,window.innerHeight*.4,'+'+exp+' EXP','float-exp');
+    showBanner('+'+exp+' EXP — 前進');
+    updateStats();
+  }
+  save();renderProjects();
+}
+function completeProj(id){
+  const p=S.projects.find(p=>p.id===id);if(!p)return;
+  p.progress=100;p.completed=true;
+  S.gold+=100;S.xp+=100;
+  if(S.xp>=500){S.xp-=500;S.lv++;showLevelUp();}
+  updateStats();
+  spawnDust(window.innerWidth/2,window.innerHeight*.4);
+  spawnLabel(window.innerWidth/2-24,window.innerHeight*.38,'+100G','float-gold');
+  setTimeout(()=>spawnLabel(window.innerWidth/2+20,window.innerHeight*.4,'+100 EXP','float-exp'),120);
+  showBanner('&#9670; 討伐完了 — +100G +100 EXP');
+  reactSpiritMini();save();renderProjects();
+}
+function deleteProj(id){
+  S.projects=S.projects.filter(p=>p.id!==id);
+  save();renderProjects();
+}
+function addProject(){
+  const name=document.getElementById('pj-name').value.trim();
+  const start=document.getElementById('pj-start').value;
+  const end=document.getElementById('pj-end').value;
+  if(!name||!start||!end)return;
+  const ci=S.projects.length%PROJ_COLORS.length;
+  S.projects.push({id:'pj'+(nextId++),name,startDate:start,endDate:end,progress:0,completed:false,color:PROJ_COLORS[ci]});
+  document.getElementById('pj-name').value='';save();renderProjects();
+}
+
+// ── 月の誓い ──
+function initVowPage(){
+  document.getElementById('vow-month-title').textContent=`${NOW.getFullYear()}年${NOW.getMonth()+1}月`;
+}
+function renderVows(){
+  let html='';
+  if(!S.vows.length){
+    html=`<div style="text-align:center;padding:32px 16px;color:var(--text3);font-size:12px;line-height:2;">まだ誓いが刻まれていないにゃ。<br>今月どう在りたいか、言葉を刻んでほしいにゃ。</div>`;
+  }
+  for(const v of S.vows){
+    const color=v.color||'#8060b0';
+    html+=`<div class="vow-card${v.fulfilled?' fulfilled':''}">
+      <div class="vow-accent" style="background:${color};"></div>
+      <div class="vow-text">${v.text}</div>
+      <div class="vow-actions">
+        <button class="vow-fulfill-btn${v.fulfilled?' fulfilled':''}" onclick="toggleVow('${v.id}')">
+          ${v.fulfilled?'&#10003; 体現中':'体現している'}
+        </button>
+        ${v.date?`<span class="vow-date">${v.date}に刻んだ</span>`:''}
+        <button class="vow-delete-btn" onclick="deleteVow('${v.id}')">✕</button>
+      </div>
+    </div>`;
+  }
+  document.getElementById('vow-cards').innerHTML=html;
+}
+function toggleVow(id){
+  const v=S.vows.find(v=>v.id===id);if(!v)return;
+  v.fulfilled=!v.fulfilled;
+  if(v.fulfilled){S.gold+=5;updateStats();showBanner('誓いを体現中 &#9670; +5G');}
+  save();renderVows();
+}
+function deleteVow(id){S.vows=S.vows.filter(v=>v.id!==id);save();renderVows();}
+function selectVowColor(el){
+  document.querySelectorAll('.vow-color-btn').forEach(b=>b.classList.remove('selected'));
+  el.classList.add('selected');selectedVowColor=el.dataset.color;
+}
+function addVow(){
+  const text=document.getElementById('vow-input').value.trim();if(!text)return;
+  const d=new Date();
+  S.vows.push({id:'v'+Date.now(),text,color:selectedVowColor,fulfilled:false,date:`${d.getMonth()+1}/${d.getDate()}`});
+  document.getElementById('vow-input').value='';
+  spawnLabel(window.innerWidth/2-30,window.innerHeight*.4,'誓いを刻んだにゃ','float-exp');
+  save();renderVows();
+}
+
+// ── PDCA ──
+function getWeekKey(o){const d=new Date();d.setDate(d.getDate()+o*7);const y=d.getFullYear(),wk=Math.ceil((((d-new Date(y,0,1))/86400000)+new Date(y,0,1).getDay()+1)/7);return`${y}_w${wk}`;}
+function getWeekRange(o){const d=new Date();d.setDate(d.getDate()+o*7);const day=d.getDay(),mon=new Date(d);mon.setDate(d.getDate()-(day===0?6:day-1));const sun=new Date(mon);sun.setDate(mon.getDate()+6);const f=dt=>`${dt.getMonth()+1}/${dt.getDate()}`;return`${f(mon)}〜${f(sun)}`;}
+function getWeekNum(o){const d=new Date();d.setDate(d.getDate()+o*7);const y=d.getFullYear(),s=new Date(y,0,1);return Math.ceil((((d-s)/86400000)+s.getDay()+1)/7);}
+function getWeekData(){const k=getWeekKey(weekOffset);if(!S.weeks[k])S.weeks[k]={kpis:[],memoDo:'',memoAct:''};return S.weeks[k];}
+function changeWeek(dir){weekOffset+=dir;renderPDCA();}
+function renderPDCA(){
+  document.getElementById('week-title').textContent=`第${getWeekNum(weekOffset)}週`;
+  document.getElementById('week-range').textContent=getWeekRange(weekOffset);
+  const data=getWeekData();
+  let ph='',ch='';
+  for(const kpi of data.kpis){
+    const pct=kpi.target>0?Math.min(Math.round(kpi.current/kpi.target*100),100):0;
+    const bc=pct>=100?'var(--teal2)':pct>=60?'var(--gold2)':'var(--purple2)';
+    const status=pct>=100?'達成':pct>=60?'順調':pct<30?'要注意':'進行中';
+    const sc=pct>=100?'over':pct<30?'danger':'under';
+    ph+=`<div class="kpi-card"><div class="kpi-top"><div class="kpi-name">${kpi.name}</div><div class="kpi-unit-label">${kpi.unit}</div><button onclick="removeKPI('${kpi.id}')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:12px;margin-left:auto;">✕</button></div><div class="kpi-nums"><div class="kpi-current">${kpi.current.toLocaleString()}</div><div class="kpi-target-label">/ ${kpi.target.toLocaleString()} ${kpi.unit}</div></div><div class="kpi-track"><div class="kpi-bar" style="width:${pct}%;background:${bc};"></div></div></div>`;
+    ch+=`<div class="kpi-card"><div class="kpi-top"><div class="kpi-name">${kpi.name}</div><div class="kpi-unit-label">${kpi.unit}</div><div class="kpi-status ${sc}" style="margin-left:auto;">${status}</div></div><div class="kpi-nums"><div class="kpi-current">${kpi.current.toLocaleString()}</div><div class="kpi-target-label">/ ${kpi.target.toLocaleString()} ${kpi.unit}</div></div><div class="kpi-track"><div class="kpi-bar" style="width:${pct}%;background:${bc};"></div></div><div class="kpi-input-row" style="margin-top:8px;"><input class="kpi-input" type="number" id="inp_${kpi.id}" value="${kpi.current}"/><button class="kpi-set-btn" onclick="setKPI('${kpi.id}')">更新</button><div style="font-size:10px;color:var(--text3);margin-left:auto;">${pct}%</div></div></div>`;
+  }
+  if(!data.kpis.length){ph=`<div style="font-size:12px;color:var(--text3);padding:8px 0;">まだKPIが刻まれていないにゃ。</div>`;ch=`<div style="font-size:12px;color:var(--text3);padding:8px 0;">KPIを追加するとここで確認できるにゃ。</div>`;}
+  document.getElementById('kpi-list').innerHTML=ph;
+  document.getElementById('kpi-check-list').innerHTML=ch;
+  document.getElementById('memo-do').value=data.memoDo||'';
+  document.getElementById('memo-act').value=data.memoAct||'';
+}
+function addKPI(){
+  const name=document.getElementById('kpi-name').value.trim(),target=parseFloat(document.getElementById('kpi-target').value)||0,unit=document.getElementById('kpi-unit').value.trim()||'件';
+  if(!name)return;
+  getWeekData().kpis.push({id:'kpi'+Date.now(),name,target,unit,current:0});
+  document.getElementById('kpi-name').value='';document.getElementById('kpi-target').value='';document.getElementById('kpi-unit').value='';
+  save();renderPDCA();
+}
+function setKPI(id){
+  const data=getWeekData(),kpi=data.kpis.find(k=>k.id===id);if(!kpi)return;
+  const was=kpi.target>0&&kpi.current>=kpi.target;
+  kpi.current=parseFloat(document.getElementById('inp_'+id).value)||0;
+  if(!was&&kpi.target>0&&kpi.current>=kpi.target){S.gold+=50;updateStats();showBanner('KPI達成 — +50G');}
+  save();renderPDCA();
+}
+function removeKPI(id){const d=getWeekData();d.kpis=d.kpis.filter(k=>k.id!==id);save();renderPDCA();}
+function saveMemo(){const d=getWeekData();d.memoDo=document.getElementById('memo-do').value;d.memoAct=document.getElementById('memo-act').value;save();}
+
+// ── SPIRIT ──
+function spiritSVG(type,state,size){
+  const t=SPIRIT_TYPES[type],s=size||80,cx=s/2,cy=s/2;
+  const isDead=state==='dead',isEgg=state==='egg',isGreat=state==='great',isBad=state==='bad';
+  const bodyColor=isDead?t.dead:isGreat?t.glow:t.color2;
+  if(isEgg)return`<ellipse cx="${cx}" cy="${cy+s*.08}" rx="${s*.28}" ry="${s*.32}" fill="${t.color}" opacity=".25" stroke="${t.color2}" stroke-width=".8"/><ellipse cx="${cx}" cy="${cy+s*.05}" rx="${s*.22}" ry="${s*.26}" fill="${t.color}" opacity=".5"/><ellipse cx="${cx-s*.06}" cy="${cy-s*.05}" rx="${s*.06}" ry="${s*.04}" fill="${t.glow}" opacity=".4"/>`;
+  const fat=isBad?1.25:isDead?1.35:1,topRx=s*.22*fat,topRy=s*.24;
+  let svg=`<ellipse cx="${cx}" cy="${cy+s*.15}" rx="${s*.24*fat+2}" ry="${s*.14}" fill="${isDead?'#1a0a30':'#08060f'}" opacity=".4"/>`;
+  svg+=`<ellipse cx="${cx}" cy="${cy+s*.1}" rx="${s*.24*fat}" ry="${s*.26*.9}" fill="${isDead?'#501870':t.color}" opacity=".85"/>`;
+  svg+=`<ellipse cx="${cx}" cy="${cy}" rx="${topRx}" ry="${topRy}" fill="${bodyColor}" opacity="${isDead?.65:1}"/>`;
+  if(!isDead&&!isBad)svg+=`<ellipse cx="${cx}" cy="${cy-s*.06}" rx="${topRx*.5}" ry="${topRy*.45}" fill="#fff" opacity="${isGreat?.3:.1}"/>`;
+  if(isDead)svg+=`<ellipse cx="${cx}" cy="${cy}" rx="${topRx*.7}" ry="${topRy*.6}" fill="#401060" opacity=".25"/>`;
+  const ey=cy-s*.04,ex1=cx-s*.12,ex2=cx+s*.12,er=isDead||isBad?s*.055:s*.05;
+  const ec=isDead?'#0f0818':'#060410';
+  svg+=`<circle cx="${ex1}" cy="${ey}" r="${er}" fill="${ec}"/><circle cx="${ex2}" cy="${ey}" r="${er}" fill="${ec}"/>`;
+  if(!isDead&&!isBad){svg+=`<circle cx="${ex1+er*.4}" cy="${ey-er*.4}" r="${er*.3}" fill="white" opacity=".6"/>`;svg+=`<circle cx="${ex2+er*.4}" cy="${ey-er*.4}" r="${er*.3}" fill="white" opacity=".6"/>`;}
+  const my=cy+s*.08;
+  if(isDead){svg+=`<path d="M${ex1+s*.02} ${my+s*.02} Q${cx} ${my} ${ex2-s*.02} ${my+s*.02}" stroke="${ec}" stroke-width="1" fill="none" stroke-linecap="round"/>`;svg+=`<path d="M${ex1-s*.04} ${ey-s*.06} L${ex1+s*.04} ${ey+s*.04}" stroke="#401070" stroke-width="1.2" stroke-linecap="round"/>`;svg+=`<path d="M${ex2+s*.04} ${ey-s*.06} L${ex2-s*.04} ${ey+s*.04}" stroke="#401070" stroke-width="1.2" stroke-linecap="round"/>`;svg+=`<ellipse cx="${cx-s*.1}" cy="${ey+s*.01}" rx="${s*.08}" ry="${s*.03}" fill="#401060" opacity=".4"/>`;svg+=`<ellipse cx="${cx+s*.1}" cy="${ey+s*.01}" rx="${s*.08}" ry="${s*.03}" fill="#401060" opacity=".4"/>`;}
+  else if(isBad){svg+=`<path d="M${ex1+s*.02} ${my+s*.02} Q${cx} ${my-s*.02} ${ex2-s*.02} ${my+s*.02}" stroke="${ec}" stroke-width="1" fill="none" stroke-linecap="round"/>`;svg+=`<path d="M${ex1-s*.02} ${ey-s*.06} L${ex1+s*.05} ${ey}" stroke="#301850" stroke-width="1.2" stroke-linecap="round"/>`;svg+=`<path d="M${ex2+s*.02} ${ey-s*.06} L${ex2-s*.05} ${ey}" stroke="#301850" stroke-width="1.2" stroke-linecap="round"/>`;}
+  else{svg+=`<path d="M${ex1+s*.02} ${my} Q${cx} ${my+s*.04} ${ex2-s*.02} ${my}" stroke="${ec}" stroke-width="1" fill="none" stroke-linecap="round"/>`;}
+  if(isGreat){svg+=`<ellipse cx="${cx}" cy="${cy-s*.32}" rx="${s*.07}" ry="${s*.1}" fill="${t.color2}" opacity=".6"/>`;for(let i=0;i<6;i++){const a=i*60+30,r=s*.35,px=cx+Math.cos(a*Math.PI/180)*r,py=cy+Math.sin(a*Math.PI/180)*r;svg+=`<circle cx="${px}" cy="${py}" r="${s*.025}" fill="${t.glow}" opacity=".5"/>`;}}
+  if(isDead)svg+=`<ellipse cx="${cx}" cy="${cy-s*.18}" rx="${s*.12}" ry="${s*.06}" fill="#501080" opacity=".2"/>`;
+  return svg;
+}
+function spiritMiniSVG(type,state){
+  const t=SPIRIT_TYPES[type]||SPIRIT_TYPES.dark,s=32,cx=16,cy=16;
+  const isDead=state==='dead',isGreat=state==='great',isBad=state==='bad';
+  const bodyColor=isDead?t.dead:isGreat?t.glow:t.color2;
+  const fat=isBad?1.2:isDead?1.3:1,topRx=s*.22*fat,topRy=s*.24;
+  let svg=`<ellipse cx="${cx}" cy="${cy+s*.1}" rx="${s*.24*fat}" ry="${s*.26*.85}" fill="${isDead?'#501870':t.color}" opacity=".85"/>`;
+  svg+=`<ellipse cx="${cx}" cy="${cy}" rx="${topRx}" ry="${topRy}" fill="${bodyColor}"/>`;
+  if(!isDead&&!isBad)svg+=`<ellipse cx="${cx}" cy="${cy-s*.06}" rx="${topRx*.5}" ry="${topRy*.45}" fill="#fff" opacity="${isGreat?.3:.1}"/>`;
+  const ey=cy-s*.04,ex1=cx-s*.12,ex2=cx+s*.12,er=s*.048,ec=isDead?'#0f0818':'#060410';
+  svg+=`<circle cx="${ex1}" cy="${ey}" r="${er}" fill="${ec}"/><circle cx="${ex2}" cy="${ey}" r="${er}" fill="${ec}"/>`;
+  if(!isDead&&!isBad){svg+=`<circle cx="${ex1+er*.4}" cy="${ey-er*.4}" r="${er*.3}" fill="white" opacity=".6"/>`;svg+=`<circle cx="${ex2+er*.4}" cy="${ey-er*.4}" r="${er*.3}" fill="white" opacity=".6"/>`;}
+  const my=cy+s*.08;
+  if(isDead){svg+=`<path d="M${ex1-s*.04} ${ey-s*.06} L${ex1+s*.04} ${ey+s*.04}" stroke="#401070" stroke-width="1.2" stroke-linecap="round"/>`;svg+=`<path d="M${ex2+s*.04} ${ey-s*.06} L${ex2-s*.04} ${ey+s*.04}" stroke="#401070" stroke-width="1.2" stroke-linecap="round"/>`;}
+  else svg+=`<path d="M${ex1+s*.02} ${my} Q${cx} ${my+s*.04} ${ex2-s*.02} ${my}" stroke="${ec}" stroke-width="1" fill="none" stroke-linecap="round"/>`;
+  if(isGreat){for(let i=0;i<5;i++){const a=i*72+20,r=s*.38,px=cx+Math.cos(a*Math.PI/180)*r,py=cy+Math.sin(a*Math.PI/180)*r;svg+=`<circle cx="${px}" cy="${py}" r="${s*.02}" fill="${t.glow}" opacity=".5"/>`;}}
+  return svg;
+}
+function renderSpiritMini(){
+  const sp=S.spirit;
+  if(!sp.contracted){document.getElementById('spirit-mini-svg').innerHTML=`<text x="16" y="20" text-anchor="middle" font-size="14" fill="var(--text3)">?</text>`;return;}
+  document.getElementById('spirit-mini-svg').innerHTML=spiritMiniSVG(sp.type,sp.state);
+}
+function reactSpiritMini(){
+  const{pct}=calcStats();
+  if(S.spirit.contracted){S.spirit.state=pct>=80?'great':pct>=50?'ok':pct>=20?'bad':'dead';save();renderSpiritMini();}
+  const inner=document.getElementById('spirit-mini-inner');
+  inner.classList.remove('bounce','glow-anim');void inner.offsetWidth;
+  inner.classList.add(pct>=80?'glow-anim':'bounce');
+  setTimeout(()=>inner.classList.remove('bounce','glow-anim'),1800);
+}
+function renderTypeGrid(){
+  document.getElementById('type-grid').innerHTML=Object.entries(SPIRIT_TYPES).map(([key,t])=>`
+    <div class="type-card${spType===key?' selected':''}" onclick="selectSpiritType('${key}')" style="${spType===key?`border-color:${t.color2};background:var(--surface3);`:''}">
+      <svg width="30" height="30" viewBox="0 0 30 30">${spiritSVG(key,'ok',30)}</svg>
+      <div class="type-card-name" style="color:${t.color2}">${t.name}</div>
+      <div class="type-card-desc">${t.desc}</div>
+    </div>`).join('');
+}
+function selectSpiritType(key){spType=key;renderTypeGrid();}
+function confirmSpirit(){
+  const name=document.getElementById('spirit-name-input').value.trim()||'名無しの精霊';
+  if(S.gold<200){alert('ゴールドが足りないにゃ（200G必要）');return;}
+  S.gold-=200;S.spirit={type:spType,name,state:'egg',contracted:true};
+  save();updateStats();
+  document.getElementById('spirit-select').style.display='none';
+  document.getElementById('spirit-view').style.display='block';
+  renderSpiritView();renderSpiritMini();
+  setTimeout(()=>{S.spirit.state='ok';save();renderSpiritView();renderSpiritMini();},1200);
+}
+function resetSpirit(){
+  document.getElementById('spirit-select').style.display='block';
+  document.getElementById('spirit-view').style.display='none';
+  document.getElementById('spirit-name-input').value=S.spirit.name==='名無しの精霊'?'':S.spirit.name;
+  spType=S.spirit.type;renderTypeGrid();
+}
+function simulate(state){S.spirit.state=state;save();renderSpiritView();renderSpiritMini();}
+function renderSpiritView(){
+  const sp=S.spirit;
+  if(!sp.contracted){document.getElementById('spirit-select').style.display='block';document.getElementById('spirit-view').style.display='none';renderTypeGrid();return;}
+  document.getElementById('spirit-select').style.display='none';
+  document.getElementById('spirit-view').style.display='block';
+  const t=SPIRIT_TYPES[sp.type],states=['egg','great','ok','bad','dead'];
+  document.getElementById('sp-badge').textContent=t.name+'の精霊';
+  document.getElementById('sp-badge').style.cssText=`background:${t.badge};color:${t.badgeText};border:1px solid ${t.color2}44;`;
+  document.getElementById('sp-name').textContent=sp.name;
+  document.getElementById('sp-status').textContent='状態 · '+STATE_LABELS[sp.state];
+  const lv=sp.state==='great'?5:sp.state==='ok'?3:sp.state==='bad'?2:sp.state==='dead'?1:0;
+  document.getElementById('sp-lv').textContent=sp.state==='egg'?'孵化待ち...':`Lv.${lv}`;
+  document.getElementById('sp-display').innerHTML=`<svg width="90" height="90" viewBox="0 0 90 90">${spiritSVG(sp.type,sp.state,90)}</svg>`;
+  const hp=sp.state==='great'?95:sp.state==='ok'?70:sp.state==='bad'?35:sp.state==='dead'?5:50;
+  const glow=sp.state==='great'?90:sp.state==='ok'?55:sp.state==='bad'?20:0;
+  const exp=sp.state==='great'?80:sp.state==='ok'?45:sp.state==='bad'?15:5;
+  document.getElementById('b-hp').style.cssText=`width:${hp}%;background:${hp>60?'var(--teal2)':hp>30?'var(--gold2)':'var(--red2)'};`;
+  document.getElementById('v-hp').textContent=hp+'%';
+  document.getElementById('b-glow').style.cssText=`width:${glow}%;background:${t.color2};box-shadow:0 0 4px ${t.color2}60;`;
+  document.getElementById('v-glow').textContent=glow+'%';
+  document.getElementById('b-exp').style.width=exp+'%';
+  document.getElementById('v-exp').textContent=exp+'%';
+  document.getElementById('sp-stages').innerHTML=states.map(s=>`
+    <div class="stage-item${s===sp.state?' active':''}">
+      <svg width="36" height="36" viewBox="0 0 36 36" style="opacity:${s===sp.state?1:.22}">${spiritSVG(sp.type,s,36)}</svg>
+      <div class="stage-label">${STATE_LABELS[s]}</div>
+    </div>`).join('');
+}
+
+// ── BACKLOG ──
+function renderBacklog(){
+  let html='';
+  for(const sec of BACKLOG){
+    html+=`<div class="backlog-section"><div class="backlog-sec-label">${sec.cat}</div>`;
+    for(const item of sec.items) html+=`<div class="backlog-item"><div class="bl-dot"></div><span style="font-size:12px;color:var(--text);line-height:1.6;">${item}</span></div>`;
+    html+='</div>';
+  }
+  document.getElementById('backlog-sections').innerHTML=html;
+}
+
+// ── 演出 ──
+function spawnDust(cx,cy){
+  const colors=['#c8a050','#a07830','#e8d8a0','#ffffff','#9060b0'];
+  for(let i=0;i<8;i++){
+    const el=document.createElement('div');el.className='dust-particle';
+    const sz=1.5+Math.random()*2.5,a=Math.random()*Math.PI*2,d=18+Math.random()*28,dur=.6+Math.random()*.5;
+    el.style.cssText=`left:${cx+Math.random()*16-8}px;top:${cy}px;width:${sz}px;height:${sz}px;background:${colors[i%5]};--dx:${Math.cos(a)*d}px;--dy:${Math.sin(a)*d-8}px;animation-duration:${dur}s;animation-delay:${i*.035}s;`;
+    document.body.appendChild(el);setTimeout(()=>el.remove(),(dur+.15)*1000);
+  }
+}
+function spawnLabel(x,y,text,cls){
+  const el=document.createElement('div');el.className='float-label '+cls;el.textContent=text;el.style.cssText=`left:${x}px;top:${y}px;`;
+  document.body.appendChild(el);setTimeout(()=>el.remove(),950);
+}
+function showBanner(text){
+  const el=document.getElementById('complete-banner');
+  el.innerHTML=`<span class="cb-gold">${text}</span>`;
+  el.classList.add('show');setTimeout(()=>el.classList.remove('show'),1800);
+}
+function popEl(id){const el=document.getElementById(id);if(!el)return;el.classList.add('pop');setTimeout(()=>el.classList.remove('pop'),300);}
+function showLevelUp(){document.getElementById('new-lv').textContent=S.lv;const b=document.getElementById('lu-banner');b.classList.add('show');setTimeout(()=>b.classList.remove('show'),2500);}
+function showAllClear(){
+  S.gold+=100;save();updateStats();
+  const wrap=document.getElementById('stars-wrap');wrap.innerHTML='';
+  const cols=['#c8a050','#9060b0','#2a8070','#c8a050','#e8d8a0'];
+  for(let i=0;i<30;i++){
+    const s=document.createElement('div');s.className='star';
+    const sz=2+Math.random()*3;
+    s.style.cssText=`left:${Math.random()*100}%;top:-10px;width:${sz}px;height:${sz}px;background:${cols[i%5]};animation-duration:${2+Math.random()*2.5}s;animation-delay:${Math.random()*.8}s;`;
+    wrap.appendChild(s);
+  }
+  document.getElementById('all-clear').classList.add('show');
+}
+function closeAllClear(){document.getElementById('all-clear').classList.remove('show');}
+
+// ── INIT ──
+function initProjDates(){
+  const fmt=d=>d.toISOString().split('T')[0];
+  const end=new Date();end.setMonth(end.getMonth()+1);
+  document.getElementById('pj-start').value=fmt(new Date());
+  document.getElementById('pj-end').value=fmt(end);
+}
+function renderAll(){
+  initDate();renderTodayQs();updateStats();
+  renderProjects();initVowPage();renderVows();
+  renderPDCA();renderBacklog();renderSpiritMini();
+  if(S.spirit&&S.spirit.contracted){spType=S.spirit.type;renderSpiritView();}
+  else renderTypeGrid();
+}
+load();initProjDates();renderAll();
+</script>
+</body>
+</html>
