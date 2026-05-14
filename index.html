@@ -905,6 +905,7 @@ html,body{
       <span class="lv-label">LV</span>
       <span class="lv-num" id="lv-val">0</span>
     </div>
+    <button id="auth-btn" onclick="showAuthUI()" style="padding:4px 10px;border-radius:8px;border:1px solid #3a3060;background:transparent;color:#5a4f6a;cursor:pointer;font-size:10px;font-family:'Noto Sans JP',sans-serif;white-space:nowrap;transition:all .15s;">ログイン</button>
   </div>
 </div>
 
@@ -1173,6 +1174,147 @@ html,body{
 </div>
 
 <script>
+
+// ══ SUPABASE設定 ══
+const SB_URL='https://bxgfbxkplcxfcccrfnsa.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4Z2ZieGtwbGN4ZmNjY3JmbnNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2ODE0NTQsImV4cCI6MjA5NDI1NzQ1NH0.K51TiUysGnqxolqUUl1YmWx82KDgDRgRIeAPrAI5q8M';
+let sbUser=null;
+
+async function sbFetch(path,method,body){
+  method=method||'GET';
+  const token=sbUser&&sbUser.access_token?sbUser.access_token:SB_KEY;
+  const opts={method:method,headers:{'apikey':SB_KEY,'Authorization':'Bearer '+token,'Content-Type':'application/json','Prefer':'return=minimal'}};
+  if(body)opts.body=JSON.stringify(body);
+  const res=await fetch(SB_URL+path,opts);
+  if(!res.ok){const e=await res.text();throw new Error(e);}
+  return res.status===204?null:res.json();
+}
+
+async function sbSignUp(email,password){
+  const res=await fetch(SB_URL+'/auth/v1/signup',{method:'POST',headers:{'apikey':SB_KEY,'Content-Type':'application/json'},body:JSON.stringify({email:email,password:password})});
+  return res.json();
+}
+async function sbSignIn(email,password){
+  const res=await fetch(SB_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'apikey':SB_KEY,'Content-Type':'application/json'},body:JSON.stringify({email:email,password:password})});
+  return res.json();
+}
+async function sbSignOut(){
+  if(!sbUser)return;
+  await fetch(SB_URL+'/auth/v1/logout',{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+sbUser.access_token}});
+  sbUser=null;localStorage.removeItem('sb_session');
+  showAuthUI();
+}
+
+async function sbRestoreSession(){
+  const saved=localStorage.getItem('sb_session');
+  if(!saved)return false;
+  try{
+    const session=JSON.parse(saved);
+    if(session.expires_at&&Date.now()/1000>session.expires_at){localStorage.removeItem('sb_session');return false;}
+    sbUser=session;return true;
+  }catch(e){return false;}
+}
+
+async function syncToSupabase(){
+  if(!sbUser)return;
+  try{
+    const uid=sbUser.user.id;
+    const existing=await sbFetch('/rest/v1/savepoint_data?user_id=eq.'+uid+'&select=id');
+    const payload={user_id:uid,data:S,updated_at:new Date().toISOString()};
+    if(existing&&existing.length>0){
+      await sbFetch('/rest/v1/savepoint_data?id=eq.'+existing[0].id,'PATCH',payload);
+    }else{
+      await sbFetch('/rest/v1/savepoint_data','POST',payload);
+    }
+  }catch(e){console.warn('sync error:',e);}
+}
+
+async function loadFromSupabase(){
+  if(!sbUser)return false;
+  try{
+    const uid=sbUser.user.id;
+    const rows=await sbFetch('/rest/v1/savepoint_data?user_id=eq.'+uid+'&select=data');
+    if(rows&&rows.length>0){S=Object.assign({},DEF,rows[0].data);return true;}
+    return false;
+  }catch(e){console.warn('load error:',e);return false;}
+}
+
+function showAuthUI(){
+  const existing=document.getElementById('auth-overlay');
+  if(existing)existing.remove();
+  const el=document.createElement('div');
+  el.id='auth-overlay';
+  el.style.cssText='position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(8,6,18,.97);display:flex;align-items:center;justify-content:center;z-index:9999;font-family:Noto Sans JP,sans-serif;';
+  el.innerHTML='<div style="width:320px;background:#1e1834;border:1px solid #3a3060;border-radius:16px;padding:28px 24px;position:relative;"><div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,#c8a050,transparent);border-radius:16px 16px 0 0;"></div><div style="text-align:center;margin-bottom:24px;"><div style="font-family:Cinzel,serif;font-size:18px;color:#e8c87a;letter-spacing:.2em;margin-bottom:4px;">SAVE POINT</div><div style="font-size:10px;color:#5a4f6a;letter-spacing:.2em;">SKILLBASE</div></div><div id="auth-msg" style="font-size:12px;color:#8a7a9a;text-align:center;margin-bottom:16px;min-height:18px;"></div><input id="auth-email" type="email" placeholder="メールアドレス" style="width:100%;background:#261f40;border:1px solid #3a3060;border-radius:8px;padding:10px 12px;color:#d8ceb8;font-size:13px;margin-bottom:8px;box-sizing:border-box;"/><input id="auth-pass" type="password" placeholder="パスワード（6文字以上）" style="width:100%;background:#261f40;border:1px solid #3a3060;border-radius:8px;padding:10px 12px;color:#d8ceb8;font-size:13px;margin-bottom:16px;box-sizing:border-box;"/><button onclick="doSignIn()" style="width:100%;padding:11px;border-radius:8px;border:1px solid #a07830;background:transparent;color:#c8a050;cursor:pointer;font-size:13px;font-family:Cinzel,serif;letter-spacing:.1em;margin-bottom:8px;">ログイン</button><button onclick="doSignUp()" style="width:100%;padding:11px;border-radius:8px;border:1px solid #3a3060;background:transparent;color:#8a7a9a;cursor:pointer;font-size:12px;">新規登録</button><div style="text-align:center;margin-top:12px;"><button onclick="skipAuth()" style="background:none;border:none;color:#3a3060;cursor:pointer;font-size:11px;text-decoration:underline;">ログインせずに使う</button></div></div>';
+  document.body.appendChild(el);
+}
+
+function setAuthMsg(msg,color){
+  color=color||'#8a7a9a';
+  const el=document.getElementById('auth-msg');
+  if(el){el.textContent=msg;el.style.color=color;}
+}
+
+async function doSignIn(){
+  const email=document.getElementById('auth-email').value.trim();
+  const pass=document.getElementById('auth-pass').value;
+  if(!email||!pass){setAuthMsg('メールとパスワードを入力してください');return;}
+  setAuthMsg('ログイン中...');
+  const data=await sbSignIn(email,pass);
+  if(data.error||!data.access_token){setAuthMsg(data.error_description||'ログインに失敗しました','#c04050');return;}
+  sbUser=data;localStorage.setItem('sb_session',JSON.stringify(data));
+  document.getElementById('auth-overlay').remove();
+  const loaded=await loadFromSupabase();
+  if(!loaded){_origSave();}
+  renderAll();initPC();updateAuthButton();
+}
+
+async function doSignUp(){
+  const email=document.getElementById('auth-email').value.trim();
+  const pass=document.getElementById('auth-pass').value;
+  if(!email||!pass){setAuthMsg('メールとパスワードを入力してください');return;}
+  if(pass.length<6){setAuthMsg('パスワードは6文字以上にしてください','#c04050');return;}
+  setAuthMsg('登録中...');
+  const data=await sbSignUp(email,pass);
+  if(data.error){setAuthMsg(data.error_description||'登録に失敗しました','#c04050');return;}
+  if(data.user&&!data.session){setAuthMsg('確認メールを送りました。メール内のリンクをクリック後、ログインしてください。','#2a8070');return;}
+  if(data.access_token){
+    sbUser=data;localStorage.setItem('sb_session',JSON.stringify(data));
+    document.getElementById('auth-overlay').remove();
+    _origSave();renderAll();initPC();updateAuthButton();
+  }
+}
+
+function skipAuth(){
+  const el=document.getElementById('auth-overlay');
+  if(el)el.remove();
+}
+
+function updateAuthButton(){
+  const btn=document.getElementById('auth-btn');
+  if(!btn)return;
+  if(sbUser){
+    const name=sbUser.user&&sbUser.user.email?sbUser.user.email.split('@')[0]:'ログイン中';
+    btn.textContent=name;
+    btn.onclick=function(){if(confirm('ログアウトしますか？'))sbSignOut();};
+    btn.style.color='#c8a050';btn.style.borderColor='#a07830';
+  }else{
+    btn.textContent='ログイン';
+    btn.onclick=showAuthUI;
+    btn.style.color='#5a4f6a';btn.style.borderColor='#3a3060';
+  }
+}
+
+const _origSave=save;
+function save(){
+  _origSave();
+  if(sbUser){
+    clearTimeout(window._syncTimer);
+    window._syncTimer=setTimeout(syncToSupabase,2000);
+  }
+}
+
+
 // ══ CONSTANTS ══
 const NOW=new Date(),TODAY_STR=NOW.toDateString(),SK='savepoint_v9';
 const SPIRIT_TYPES={
@@ -1726,7 +1868,17 @@ function renderAll(){
   if(S.spirit&&S.spirit.contracted){spType=S.spirit.type;renderSpiritView();}
   else renderTypeGrid();
 }
-load();initProjDates();renderAll();
+(async function(){
+  const restored=await sbRestoreSession();
+  load();initProjDates();
+  if(restored){
+    const loaded=await loadFromSupabase();
+    renderAll();initPC();updateAuthButton();
+  }else{
+    renderAll();initPC();
+    showAuthUI();
+  }
+})();
 // ══ PC版プロジェクトログ ══
 let pcSelectedId=null;
 let pcViewYear=new Date().getFullYear(),pcViewMonth=new Date().getMonth();
