@@ -752,6 +752,125 @@ html,body{
 }
 .levelup-banner.show{transform:translateX(-50%) translateY(0);opacity:1;}
 .divider{height:1px;background:var(--border);margin:13px 0;}
+
+/* ══ PC LAYOUT（768px以上） ══ */
+@media(min-width:768px){
+  html,body{max-width:100%;font-size:13px;}
+
+  /* ヘッダー拡張 */
+  .header{padding:11px 28px;gap:16px;}
+  .header-center{flex:1;text-align:center;}
+  .pc-page-title{display:block;font-family:'Cinzel',serif;font-size:12px;color:var(--gold2);letter-spacing:.2em;}
+  .pc-page-sub{display:block;font-size:9px;color:var(--text3);margin-top:1px;letter-spacing:.1em;}
+  .pc-stat-chips{display:flex;align-items:center;gap:7px;}
+  .pc-stat-chip{display:flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;}
+  .pc-stat-chip-label{font-size:9px;color:var(--text3);letter-spacing:.05em;}
+  .pc-stat-chip-val{font-size:14px;font-weight:700;color:var(--gold2);font-family:'Cinzel',serif;}
+  .pc-stat-chip.urgent .pc-stat-chip-val{color:var(--red2);}
+
+  /* タブを横並び固定 */
+  .tabs{top:52px;}
+
+  /* プロジェクトログ：2カラム */
+  .proj-pc-layout{display:grid;grid-template-columns:280px 1fr;gap:0;min-height:calc(100vh - 104px);}
+  .proj-pc-left{border-right:1px solid var(--border);background:rgba(14,11,26,.5);padding:18px 14px;overflow-y:auto;max-height:calc(100vh - 104px);position:sticky;top:104px;}
+  .proj-pc-right{padding:18px 22px;overflow-x:auto;}
+  .proj-pc-panel-title{font-family:'Cinzel',serif;font-size:10px;color:var(--gold2);letter-spacing:.2em;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+  .proj-pc-panel-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(160,120,48,.3),transparent);}
+
+  /* 左カード */
+  .proj-pc-card{background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:11px 12px;margin-bottom:7px;cursor:pointer;transition:all .15s;position:relative;overflow:hidden;}
+  .proj-pc-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;border-radius:2px 0 0 2px;}
+  .proj-pc-card:hover{border-color:var(--border2);background:var(--surface3);}
+  .proj-pc-card.pc-active{border-color:var(--border2);background:var(--surface3);}
+  .proj-pc-card.pc-completed{opacity:.42;}
+  .proj-pc-card-name{font-size:11px;font-weight:500;color:var(--text);margin-bottom:6px;line-height:1.4;}
+  .proj-pc-card-meta{display:flex;align-items:center;gap:6px;}
+  .proj-pc-card-pct{font-size:11px;font-weight:700;}
+  .proj-pc-card-bar{flex:1;height:3px;background:var(--surface3);border-radius:2px;}
+  .proj-pc-card-fill{height:3px;border-radius:2px;}
+  .proj-pc-card-status{font-size:9px;padding:2px 6px;border-radius:4px;font-weight:500;flex-shrink:0;}
+  .proj-pc-card-days{font-size:9px;color:var(--text3);margin-top:4px;}
+  .proj-pc-add-sm{width:100%;padding:7px;border-radius:7px;border:1px dashed rgba(160,120,48,.3);background:transparent;color:var(--text3);cursor:pointer;font-size:11px;font-family:'Noto Sans JP',sans-serif;transition:all .15s;margin-top:4px;}
+  .proj-pc-add-sm:hover{border-color:var(--gold);color:var(--gold2);}
+
+  /* ガント */
+  .gantt-wrap{background:var(--surface2);border:1px solid var(--border);border-radius:12px;overflow:hidden;min-width:600px;}
+  .gantt-head{display:flex;border-bottom:1px solid var(--border);background:rgba(14,11,26,.6);}
+  .gantt-head-name{width:160px;flex-shrink:0;padding:7px 10px;font-size:9px;color:var(--text3);letter-spacing:.06em;border-right:1px solid var(--border);display:flex;align-items:center;}
+  .gantt-head-dates{flex:1;display:flex;}
+  .gantt-date-cell{flex:1;text-align:center;font-size:8px;color:var(--text3);padding:4px 0;border-right:1px solid rgba(58,48,96,.2);min-width:0;}
+  .gantt-date-cell.gdc-today{color:var(--gold2);font-weight:700;}
+  .gantt-date-cell.gdc-sun{color:#c06060;}
+  .gantt-date-cell.gdc-sat{color:var(--purple2);}
+  .gantt-date-cell.gdc-mon{border-right:1px solid rgba(82,72,128,.5);}
+  .gantt-row{display:flex;align-items:stretch;border-bottom:1px solid rgba(58,48,96,.2);min-height:42px;cursor:pointer;transition:background .1s;}
+  .gantt-row:last-child{border-bottom:none;}
+  .gantt-row:hover{background:rgba(46,40,80,.3);}
+  .gantt-row.gantt-selected{background:rgba(46,40,80,.5);}
+  .gantt-row.gantt-completed{opacity:.4;}
+  .gantt-name-col{width:160px;flex-shrink:0;padding:7px 10px;border-right:1px solid var(--border);display:flex;flex-direction:column;justify-content:center;gap:2px;border-left:2px solid transparent;}
+  .gantt-name-text{font-size:10px;font-weight:500;color:var(--text);line-height:1.4;}
+  .gantt-name-pct{font-size:9px;font-weight:700;}
+  .gantt-name-rem{font-size:8px;color:var(--text3);}
+  .gantt-bar-area{flex:1;position:relative;display:flex;align-items:center;}
+  .g-week-line{position:absolute;top:0;bottom:0;width:1px;background:rgba(82,72,128,.25);pointer-events:none;z-index:1;}
+  .g-today-line{position:absolute;top:0;bottom:0;width:2px;background:var(--gold2);box-shadow:0 0 6px rgba(200,160,80,.6),0 0 14px rgba(200,160,80,.25);z-index:4;pointer-events:none;}
+  .g-today-line::before{content:'今日';position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-size:8px;color:var(--gold2);white-space:nowrap;}
+  .g-past{position:absolute;top:0;bottom:0;left:0;background:rgba(20,16,36,.4);pointer-events:none;z-index:0;}
+  .g-bar-bg{position:absolute;height:16px;border-radius:8px;background:var(--surface3);border:1px solid rgba(58,48,96,.5);z-index:2;}
+  .g-bar-done{position:absolute;height:16px;border-radius:8px;z-index:3;opacity:.85;transition:width .5s cubic-bezier(.4,0,.2,1);}
+  .g-bar-tip{position:absolute;height:16px;width:8px;border-radius:0 8px 8px 0;z-index:3;opacity:.65;animation:gTipPulse 2s ease-in-out infinite;}
+  @keyframes gTipPulse{0%,100%{opacity:.65;}50%{opacity:1;filter:brightness(1.3);}}
+
+  /* 詳細パネル */
+  .proj-detail-panel{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px;margin-top:16px;position:relative;overflow:hidden;}
+  .proj-detail-panel::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(160,120,48,.4),transparent);}
+  .pdp-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+  .pdp-accent{width:3px;min-height:36px;border-radius:2px;flex-shrink:0;}
+  .pdp-name{font-size:15px;font-weight:500;color:var(--text);flex:1;}
+  .pdp-status{font-size:10px;padding:3px 9px;border-radius:6px;font-weight:500;}
+  .pdp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:12px;}
+  .pdp-cell{background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:9px 11px;text-align:center;}
+  .pdp-cell-label{font-size:9px;color:var(--text3);letter-spacing:.06em;margin-bottom:3px;}
+  .pdp-cell-val{font-size:18px;font-weight:700;color:var(--gold2);line-height:1;font-family:'Cinzel',serif;}
+  .pdp-cell-sub{font-size:9px;color:var(--text3);margin-top:2px;}
+  .pdp-cell-val.pdp-urgent{color:var(--red2);}
+  .pdp-cell-val.pdp-done{color:var(--teal2);}
+  .pdp-ctrl{display:flex;align-items:center;gap:8px;padding-top:11px;border-top:1px solid rgba(58,48,96,.4);}
+  .pdp-pct{font-size:22px;font-weight:700;font-family:'Cinzel',serif;min-width:56px;}
+  .pdp-track{flex:1;height:7px;background:var(--surface3);border-radius:4px;}
+  .pdp-bar{height:100%;border-radius:4px;transition:width .5s;}
+  .pdp-btns{display:flex;gap:5px;flex-wrap:wrap;}
+  .pdp-btn{padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;font-size:11px;font-family:'Noto Sans JP',sans-serif;transition:all .1s;}
+  .pdp-btn:hover{background:var(--surface3);border-color:var(--border2);}
+  .pdp-btn.pdp-fwd{border-color:rgba(160,120,48,.5);color:var(--gold2);}
+  .pdp-btn.pdp-fwd:hover{background:rgba(160,120,48,.1);}
+  .pdp-btn.pdp-complete{border-color:rgba(42,128,112,.5);color:var(--teal2);}
+  .pdp-btn.pdp-delete{border-color:rgba(122,32,48,.35);color:var(--text3);font-size:10px;}
+
+  /* 月ナビ */
+  .proj-month-nav{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .proj-mnav-btn{padding:4px 11px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;font-size:14px;}
+  .proj-mnav-btn:hover{background:var(--surface2);}
+  .proj-month-label{font-family:'Cinzel',serif;font-size:13px;color:var(--gold2);letter-spacing:.15em;flex:1;text-align:center;}
+  .proj-today-btn{padding:4px 12px;border-radius:6px;border:1px solid rgba(160,120,48,.4);background:transparent;color:var(--gold2);cursor:pointer;font-size:11px;font-family:'Noto Sans JP',sans-serif;}
+
+  /* 追加フォーム PC */
+  .proj-add-form-pc{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-top:16px;}
+  .proj-add-form-grid{display:grid;grid-template-columns:1fr 150px 150px auto;gap:9px;align-items:end;}
+  .proj-form-group{display:flex;flex-direction:column;gap:4px;}
+  .proj-form-label{font-size:9px;color:var(--text3);letter-spacing:.05em;}
+
+  /* スマホ専用UIを非表示 */
+  .proj-mobile-only{display:none !important;}
+  /* PC専用UIを表示 */
+  .proj-pc-only{display:block !important;}
+}
+
+/* スマホではPC UIを非表示 */
+.proj-pc-only{display:none;}
+.proj-mobile-only{display:block;}
 </style>
 </head>
 <body>
@@ -766,7 +885,16 @@ html,body{
   <div>
     <div class="logo">SAVE POINT<span class="logo-sub">SKILLBASE</span></div>
   </div>
+  <div class="header-center" style="display:none;" id="pc-header-center">
+    <div class="pc-page-title" id="pc-page-title">SAVE POINT</div>
+    <div class="pc-page-sub" id="pc-page-sub">SKILLBASE</div>
+  </div>
   <div class="header-right">
+    <div class="pc-stat-chips" id="pc-stat-chips" style="display:none;">
+      <div class="pc-stat-chip"><span class="pc-stat-chip-label">ACTIVE</span><span class="pc-stat-chip-val" id="pc-h-active">0</span></div>
+      <div class="pc-stat-chip urgent"><span class="pc-stat-chip-label">URGENT</span><span class="pc-stat-chip-val" id="pc-h-urgent" style="color:var(--red2)">0</span></div>
+      <div class="pc-stat-chip"><span class="pc-stat-chip-label">DONE</span><span class="pc-stat-chip-val" id="pc-h-done">0</span></div>
+    </div>
     <div class="gold-badge" id="gold-badge">
       <span class="gold-icon">&#9670;</span>
       <span id="gold-val">0</span>G
@@ -1108,11 +1236,13 @@ function renderTodayQs(){
     for(const q of items){
       const done=!!S.done[q.id];
       if(sec==='main'){
-        html+=`<div class="priority-item${done?' done':''}" id="ci_${q.id}" onclick="toggleQ('${q.id}','${sec}')">
-          <div class="pi-main"><div class="pi-check"></div><div class="pi-text">${q.text}</div></div>
+        const isExtra=!!S.extraTasks.find(eq=>eq.id===q.id);
+        html+=`<div class="priority-item${done?' done':''}" id="ci_${q.id}">
+          <div class="pi-main" onclick="toggleQ('${q.id}','${sec}')"><div class="pi-check"></div><div class="pi-text">${q.text}</div></div>
           <div class="pi-sub">
             <div class="pi-reward">&#9670; +${cfg.gold}G &nbsp;&#9670; +${cfg.exp} EXP</div>
             <div class="pi-hint">${done?'&#10003; 討伐済み':'タップで討伐'}</div>
+            <button onclick="deleteMainQ('${q.id}')" style="margin-left:auto;background:none;border:none;color:var(--text3);cursor:pointer;font-size:11px;opacity:.45;padding:2px 4px;transition:opacity .15s;" onmouseover="this.style.opacity='.9'" onmouseout="this.style.opacity='.45'">✕</button>
           </div>
         </div>`;
       } else if(sec==='routine'){
@@ -1149,6 +1279,11 @@ function toggleQ(id,sec){
   save();updateStats();reactSpiritMini();
   const{done,total}=calcStats();
   if(done>=total-1)setTimeout(()=>showAllClear(),600);
+}
+function deleteMainQ(id){
+  S.extraTasks=S.extraTasks.filter(q=>q.id!==id);
+  delete S.done[id];
+  save();renderTodayQs();updateStats();
 }
 function addTodayQuest(){
   const name=document.getElementById('new-q').value.trim();
@@ -1530,7 +1665,232 @@ function renderAll(){
   if(S.spirit&&S.spirit.contracted){spType=S.spirit.type;renderSpiritView();}
   else renderTypeGrid();
 }
-load();initProjDates();renderAll();
+load();initProjDates();renderAll();initPC();
+// ══ PC版プロジェクトログ ══
+let pcSelectedId=null;
+let pcViewYear=new Date().getFullYear(),pcViewMonth=new Date().getMonth();
+
+function pcDiff(a,b){return Math.round((new Date(b)-new Date(a))/(1000*60*60*24));}
+function pcDateStr(d){const dt=new Date(d);return`${dt.getMonth()+1}/${dt.getDate()}`;}
+function pcDaysInMonth(y,m){return new Date(y,m+1,0).getDate();}
+function pcDOW(y,m,d){return new Date(y,m,d).getDay();}
+function pcRemaining(p){return pcDiff(new Date().toISOString().split('T')[0],p.endDate);}
+function pcStatusInfo(p){
+  if(p.completed)return{text:'討伐完了',color:'var(--teal2)',bg:'rgba(42,128,112,.15)'};
+  const r=pcRemaining(p);
+  if(r<0)return{text:`${Math.abs(r)}日超過`,color:'var(--red2)',bg:'rgba(192,64,80,.15)'};
+  if(r<=7)return{text:`残り${r}日`,color:'var(--red2)',bg:'rgba(192,64,80,.12)'};
+  return{text:`残り${r}日`,color:'var(--text2)',bg:'var(--surface3)'};
+}
+
+function pcUpdateHeader(){
+  const active=S.projects.filter(p=>!p.completed).length;
+  const urgent=S.projects.filter(p=>!p.completed&&pcRemaining(p)>=0&&pcRemaining(p)<=7).length;
+  const done=S.projects.filter(p=>p.completed).length;
+  const hc=document.getElementById('pc-h-active');
+  if(hc){document.getElementById('pc-h-active').textContent=active;document.getElementById('pc-h-urgent').textContent=urgent;document.getElementById('pc-h-done').textContent=done;}
+}
+
+function pcRenderLeft(){
+  const el=document.getElementById('pc-proj-list');if(!el)return;
+  let html='';
+  for(const p of S.projects){
+    const s=pcStatusInfo(p);
+    const isActive=p.id===pcSelectedId;
+    html+=`<div class="proj-pc-card${p.completed?' pc-completed':''}${isActive?' pc-active':''}" onclick="pcSelectProject('${p.id}')">
+      <div style="position:absolute;left:0;top:0;bottom:0;width:2px;border-radius:2px 0 0 2px;background:${p.color||'#8060b0'};"></div>
+      <div class="proj-pc-card-name">${p.name}</div>
+      <div class="proj-pc-card-meta">
+        <span class="proj-pc-card-pct" style="color:${p.color||'#8060b0'}">${p.progress}%</span>
+        <div class="proj-pc-card-bar"><div class="proj-pc-card-fill" style="width:${p.progress}%;background:${p.color||'#8060b0'};opacity:.8;height:3px;border-radius:2px;"></div></div>
+        <span class="proj-pc-card-status" style="background:${s.bg};color:${s.color};border:1px solid ${s.color}44;">${s.text}</span>
+      </div>
+      <div class="proj-pc-card-days">${pcDateStr(p.startDate)} — ${pcDateStr(p.endDate)}</div>
+    </div>`;
+  }
+  el.innerHTML=html;
+}
+
+function pcRenderGantt(){
+  const el=document.getElementById('pc-gantt-wrap');if(!el)return;
+  const days=pcDaysInMonth(pcViewYear,pcViewMonth);
+  const isCur=pcViewYear===NOW.getFullYear()&&pcViewMonth===NOW.getMonth();
+  const todayD=NOW.getDate();
+  const monthEl=document.getElementById('pc-month-label');
+  if(monthEl)monthEl.textContent=`${pcViewYear}年${pcViewMonth+1}月`;
+
+  let html='<div class="gantt-head"><div class="gantt-head-name">プロジェクト</div><div class="gantt-head-dates">';
+  for(let d=1;d<=days;d++){
+    const dow=pcDOW(pcViewYear,pcViewMonth,d);
+    const isToday=isCur&&d===todayD;
+    let cls='gantt-date-cell';
+    if(isToday)cls+=' gdc-today';
+    else if(dow===0)cls+=' gdc-sun';
+    else if(dow===6)cls+=' gdc-sat';
+    if(dow===1&&d>1)cls+=' gdc-mon';
+    html+=`<div class="${cls}">${d}</div>`;
+  }
+  html+='</div></div>';
+
+  const TODAY_ISO=NOW.toISOString().split('T')[0];
+  for(const p of S.projects){
+    const s=pcStatusInfo(p);
+    const color=p.color||'#8060b0';
+    const mStart=new Date(pcViewYear,pcViewMonth,1);
+    const mEnd=new Date(pcViewYear,pcViewMonth,days,23,59,59);
+    const pStart=new Date(p.startDate),pEnd=new Date(p.endDate);
+    const visible=pStart<=mEnd&&pEnd>=mStart;
+    let barLeft=0,barW=100;
+    if(visible){
+      const tot=mEnd-mStart;
+      const sl=Math.max(pStart-mStart,0);
+      const el2=Math.min(pEnd-mStart,tot);
+      barLeft=(sl/tot)*100;barW=((el2-sl)/tot)*100;
+    }
+    const todayLineLeft=isCur?((todayD-1)/days)*100:-1;
+    const pastShadeW=isCur?((todayD-1)/days)*100:0;
+    let weekLines='';
+    for(let d=1;d<=days;d++){
+      if(pcDOW(pcViewYear,pcViewMonth,d)===1&&d>1){const lp=((d-1)/days)*100;weekLines+=`<div class="g-week-line" style="left:${lp}%"></div>`;}
+    }
+    const isSelected=p.id===pcSelectedId;
+    html+=`<div class="gantt-row${p.completed?' gantt-completed':''}${isSelected?' gantt-selected':''}" onclick="pcSelectProject('${p.id}')">
+      <div class="gantt-name-col" style="border-left-color:${color};">
+        <div class="gantt-name-text">${p.name}</div>
+        <div class="gantt-name-pct" style="color:${color}">${p.progress}%</div>
+        <div class="gantt-name-rem" style="color:${s.color}">${s.text}</div>
+      </div>
+      <div class="gantt-bar-area">
+        ${weekLines}
+        ${pastShadeW>0?`<div class="g-past" style="width:${pastShadeW}%"></div>`:''}
+        ${todayLineLeft>=0?`<div class="g-today-line" style="left:${Math.min(todayLineLeft,97)}%"></div>`:''}
+        ${visible?`
+          <div class="g-bar-bg" style="left:${barLeft}%;width:${barW}%;top:50%;transform:translateY(-50%);"></div>
+          <div class="g-bar-done" style="left:${barLeft}%;width:${barW*p.progress/100}%;top:50%;transform:translateY(-50%);background:${color};${p.progress>0?`box-shadow:0 0 5px ${color}60;`:''}"></div>
+          ${!p.completed&&p.progress<100?`<div class="g-bar-tip" style="left:${barLeft+barW*p.progress/100}%;top:50%;transform:translateY(-50%);background:${color};"></div>`:''}`
+        :`<div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:9px;color:var(--text3);">この月は対象外</div>`}
+      </div>
+    </div>`;
+  }
+  el.innerHTML=html;
+}
+
+function pcRenderDetail(){
+  const el=document.getElementById('pc-detail-panel');if(!el)return;
+  const p=S.projects.find(p=>p.id===pcSelectedId);
+  if(!p){el.style.display='none';return;}
+  el.style.display='block';
+  const s=pcStatusInfo(p);
+  const color=p.color||'#8060b0';
+  const TODAY_ISO=NOW.toISOString().split('T')[0];
+  const totalDays=Math.max(1,pcDiff(p.startDate,p.endDate));
+  const pastDays=Math.max(0,Math.min(pcDiff(p.startDate,TODAY_ISO),totalDays));
+  const timePct=Math.round(pastDays/totalDays*100);
+  const rem=pcRemaining(p);
+  const isOverdue=rem<0;
+  const remText=p.completed?'完了':isOverdue?`${Math.abs(rem)}日超過`:`${rem}日`;
+  const urgentCls=(!p.completed&&(isOverdue||rem<=7))?'pdp-urgent':'';
+  const doneCls=p.completed?'pdp-done':'';
+  el.innerHTML=`
+    <div class="pdp-header">
+      <div class="pdp-accent" style="background:${color};"></div>
+      <div class="pdp-name">${p.name}</div>
+      <div class="pdp-status" style="background:${s.bg};color:${s.color};border:1px solid ${s.color}44;">${s.text}</div>
+    </div>
+    <div class="pdp-grid">
+      <div class="pdp-cell"><div class="pdp-cell-label">進捗</div><div class="pdp-cell-val" style="color:${color}">${p.progress}%</div><div class="pdp-cell-sub">達成</div></div>
+      <div class="pdp-cell"><div class="pdp-cell-label">時間軸</div><div class="pdp-cell-val">${timePct}%</div><div class="pdp-cell-sub">経過</div></div>
+      <div class="pdp-cell"><div class="pdp-cell-label">残り日数</div><div class="pdp-cell-val ${urgentCls}${doneCls}">${remText}</div><div class="pdp-cell-sub">${pcDateStr(p.endDate)}締切</div></div>
+      <div class="pdp-cell"><div class="pdp-cell-label">期間</div><div class="pdp-cell-val" style="font-size:14px;">${totalDays}</div><div class="pdp-cell-sub">日間</div></div>
+    </div>
+    ${!p.completed?`
+    <div class="pdp-ctrl">
+      <div class="pdp-pct" style="color:${color}">${p.progress}%</div>
+      <div class="pdp-track"><div class="pdp-bar" style="width:${p.progress}%;background:${color};box-shadow:0 0 7px ${color}50;"></div></div>
+      <div class="pdp-btns">
+        <button class="pdp-btn pdp-fwd" onclick="pcAdvance(5)">+5%</button>
+        <button class="pdp-btn pdp-fwd" onclick="pcAdvance(10)">+10%</button>
+        <button class="pdp-btn pdp-fwd" onclick="pcAdvance(25)">+25%</button>
+        <button class="pdp-btn" onclick="pcAdvance(-5)">-5%</button>
+        <button class="pdp-btn pdp-complete" onclick="pcCompleteProject()">討伐完了</button>
+        <button class="pdp-btn pdp-delete" onclick="pcDeleteProject()">削除</button>
+      </div>
+    </div>`:`
+    <div style="display:flex;align-items:center;gap:10px;padding-top:10px;border-top:1px solid rgba(58,48,96,.3);">
+      <span style="font-size:11px;color:var(--teal2);">&#10003; 討伐完了 — お疲れ様でしたにゃ。</span>
+      <button class="pdp-btn pdp-delete" style="margin-left:auto;" onclick="pcDeleteProject()">削除</button>
+    </div>`}
+  `;
+}
+
+function pcSelectProject(id){
+  pcSelectedId=id;
+  pcRenderLeft();pcRenderGantt();pcRenderDetail();
+  document.getElementById('pc-detail-panel')?.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function pcAdvance(delta){
+  const p=S.projects.find(p=>p.id===pcSelectedId);if(!p)return;
+  p.progress=Math.max(0,Math.min(100,p.progress+delta));
+  if(delta>0){const exp=Math.round(Math.abs(delta)/5);showBanner('+'+exp+' EXP — 前進！');}
+  save();pcRenderAll();renderProjects();
+}
+function pcCompleteProject(){
+  const p=S.projects.find(p=>p.id===pcSelectedId);if(!p)return;
+  p.progress=100;p.completed=true;
+  S.gold+=100;S.xp+=100;
+  if(S.xp>=500){S.xp-=500;S.lv++;showLevelUp();}
+  updateStats();showBanner('&#9670; 討伐完了！ +100G +100 EXP');
+  save();pcRenderAll();renderProjects();
+}
+function pcDeleteProject(){
+  if(!confirm('このプロジェクトを削除しますか？'))return;
+  S.projects=S.projects.filter(p=>p.id!==pcSelectedId);
+  pcSelectedId=null;save();pcRenderAll();renderProjects();
+}
+function pcAddProject(){
+  const name=document.getElementById('pc-pj-name')?.value.trim();
+  const start=document.getElementById('pc-pj-start')?.value;
+  const end=document.getElementById('pc-pj-end')?.value;
+  if(!name||!start||!end)return;
+  const colors=['#8060b0','#1D9E75','#c87020','#185FA5','#993556','#a07030','#2a6a5a'];
+  const ci=S.projects.length%colors.length;
+  S.projects.push({id:'pj'+(nextId++),name,startDate:start,endDate:end,progress:0,completed:false,color:colors[ci]});
+  if(document.getElementById('pc-pj-name'))document.getElementById('pc-pj-name').value='';
+  save();pcRenderAll();renderProjects();
+}
+function pcChangeMonth(dir){
+  pcViewMonth+=dir;
+  if(pcViewMonth>11){pcViewMonth=0;pcViewYear++;}
+  if(pcViewMonth<0){pcViewMonth=11;pcViewYear--;}
+  pcRenderGantt();
+}
+function pcGoToday(){pcViewYear=NOW.getFullYear();pcViewMonth=NOW.getMonth();pcRenderGantt();}
+
+function pcRenderAll(){
+  pcUpdateHeader();pcRenderLeft();pcRenderGantt();pcRenderDetail();
+}
+
+// PC判定で初期化
+function initPC(){
+  if(window.innerWidth>=768){
+    const hc=document.getElementById('pc-header-center');
+    if(hc)hc.style.display='block';
+    const sc=document.getElementById('pc-stat-chips');
+    if(sc)sc.style.display='flex';
+    // 日付初期化
+    const fmt=d=>d.toISOString().split('T')[0];
+    const end=new Date();end.setMonth(end.getMonth()+1);
+    const ps=document.getElementById('pc-pj-start');
+    const pe=document.getElementById('pc-pj-end');
+    if(ps)ps.value=fmt(new Date());
+    if(pe)pe.value=fmt(end);
+    pcRenderAll();
+  }
+}
+window.addEventListener('resize',()=>{
+  if(window.innerWidth>=768)initPC();
+});
+
 </script>
 </body>
 </html>
