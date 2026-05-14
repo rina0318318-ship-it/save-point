@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAVE POINT — 使い方ガイド</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --surface:#161228;--surface2:#1e1834;--surface3:#261f40;
+  --border:#3a3060;--border2:#524880;
+  --gold:#a07830;--gold2:#c8a050;--gold3:#e8c87a;
+  --text:#d8ceb8;--text2:#8a7a9a;--text3:#5a4f6a;
+  --purple2:#8060b0;--purple3:#a080d0;
+  --teal2:#2a8070;
+}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--surface);color:var(--text);
+  font-family:'Noto Sans JP',sans-serif;
+  font-size:15px;line-height:1.8;
+  background-image:
+    radial-gradient(ellipse at 10% 0%,rgba(90,63,138,.15) 0%,transparent 50%),
+    radial-gradient(ellipse at 90% 60%,rgba(26,90,80,.1) 0%,transparent 50%);
+  min-height:100vh;
+}
+
+/* ── HERO ── */
+.hero{
+  text-align:center;
+  padding:72px 24px 56px;
+  position:relative;overflow:hidden;
+  border-bottom:1px solid var(--border);
+}
+.hero::before{
+  content:'';position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:400px;height:400px;border-radius:50%;
+  border:1px solid rgba(160,120,48,.08);
+  pointer-events:none;
+}
+.hero::after{
+  content:'';position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:280px;height:280px;border-radius:50%;
+  border:1px solid rgba(160,120,48,.06);
+  pointer-events:none;
+}
+.hero-logo{
+  display:flex;align-items:center;justify-content:center;gap:12px;
+  margin-bottom:20px;
+}
+.hero-title{
+  font-family:'Cinzel',serif;
+  font-size:clamp(24px,5vw,38px);
+  color:var(--gold3);letter-spacing:.25em;font-weight:600;
+}
+.hero-subtitle{
+  font-size:11px;color:var(--text3);letter-spacing:.3em;
+  margin-top:4px;
+}
+.hero-desc{
+  font-size:15px;color:var(--text2);
+  max-width:520px;margin:0 auto;line-height:1.9;
+  margin-top:16px;
+}
+.hero-tagline{
+  font-size:13px;color:var(--gold2);
+  margin-top:20px;letter-spacing:.08em;
+  font-style:italic;
+}
+
+/* ── TOC ── */
+.toc{
+  max-width:680px;margin:0 auto;
+  padding:40px 24px;
+}
+.toc-title{
+  font-family:'Cinzel',serif;font-size:11px;
+  color:var(--gold2);letter-spacing:.2em;
+  margin-bottom:16px;
+  display:flex;align-items:center;gap:10px;
+}
+.toc-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(160,120,48,.3),transparent);}
+.toc-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+  gap:8px;
+}
+.toc-item{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:9px;padding:10px 14px;
+  text-decoration:none;color:var(--text2);
+  font-size:13px;transition:all .15s;
+  display:flex;align-items:center;gap:8px;
+}
+.toc-item:hover{border-color:var(--gold);color:var(--gold2);background:var(--surface3);}
+.toc-num{font-family:'Cinzel',serif;font-size:10px;color:var(--gold);opacity:.7;}
+
+/* ── MAIN ── */
+.main{max-width:680px;margin:0 auto;padding:0 24px 80px;}
+
+/* セクション */
+.section{
+  margin-bottom:56px;
+  scroll-margin-top:24px;
+}
+.section-header{
+  display:flex;align-items:center;gap:12px;
+  margin-bottom:24px;
+  padding-bottom:14px;
+  border-bottom:1px solid var(--border);
+}
+.section-num{
+  font-family:'Cinzel',serif;font-size:11px;
+  color:var(--gold2);letter-spacing:.15em;
+  background:rgba(160,120,48,.1);
+  border:1px solid rgba(160,120,48,.3);
+  border-radius:5px;padding:3px 9px;
+  white-space:nowrap;
+}
+.section-title{
+  font-family:'Cinzel',serif;
+  font-size:18px;color:var(--gold3);letter-spacing:.1em;
+}
+
+/* 説明テキスト */
+.desc{
+  font-size:14px;color:var(--text2);
+  line-height:1.9;margin-bottom:16px;
+}
+.desc strong{color:var(--text);font-weight:500;}
+
+/* タブ説明カード */
+.tab-cards{display:flex;flex-direction:column;gap:10px;margin-bottom:20px;}
+.tab-card{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:11px;padding:16px 18px;
+  display:flex;gap:14px;align-items:flex-start;
+  position:relative;overflow:hidden;
+}
+.tab-card::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;
+  width:2px;border-radius:2px 0 0 2px;
+}
+.tab-card-icon{
+  width:36px;height:36px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;font-size:16px;
+}
+.tab-card-body{flex:1;}
+.tab-card-name{
+  font-size:13px;font-weight:500;color:var(--text);
+  margin-bottom:4px;
+}
+.tab-card-desc{font-size:12px;color:var(--text2);line-height:1.7;}
+.tab-card-tag{
+  display:inline-block;font-size:9px;padding:2px 7px;
+  border-radius:4px;margin-top:6px;
+  background:rgba(160,120,48,.1);
+  color:var(--gold2);border:1px solid rgba(160,120,48,.25);
+  letter-spacing:.05em;
+}
+
+/* ステップ */
+.steps{display:flex;flex-direction:column;gap:12px;margin-bottom:16px;}
+.step{
+  display:flex;gap:14px;align-items:flex-start;
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:10px;padding:14px 16px;
+}
+.step-num{
+  width:26px;height:26px;border-radius:50%;
+  background:linear-gradient(135deg,rgba(100,70,20,.6),rgba(60,40,10,.4));
+  border:1px solid rgba(160,120,48,.4);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Cinzel',serif;font-size:11px;color:var(--gold2);
+  flex-shrink:0;margin-top:1px;
+}
+.step-body{flex:1;}
+.step-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:3px;}
+.step-desc{font-size:12px;color:var(--text2);line-height:1.7;}
+
+/* ポイントボックス */
+.point-box{
+  background:rgba(160,120,48,.07);
+  border:1px solid rgba(160,120,48,.25);
+  border-radius:10px;padding:14px 16px;
+  margin-bottom:16px;
+  font-size:13px;color:var(--text2);line-height:1.8;
+}
+.point-box-title{
+  font-size:10px;color:var(--gold2);
+  letter-spacing:.12em;margin-bottom:7px;
+  font-weight:500;
+}
+
+/* インフォボックス */
+.info-box{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:10px;padding:14px 16px;
+  margin-bottom:16px;
+  font-size:13px;color:var(--text2);line-height:1.8;
+}
+.info-box-title{
+  font-size:10px;color:var(--text3);
+  letter-spacing:.1em;margin-bottom:6px;
+}
+
+/* ゲーム要素説明 */
+.game-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+  gap:9px;margin-bottom:16px;
+}
+.game-item{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:9px;padding:13px 14px;
+}
+.game-item-label{
+  font-size:10px;color:var(--text3);
+  letter-spacing:.08em;margin-bottom:5px;
+}
+.game-item-val{
+  font-size:15px;font-weight:500;color:var(--gold2);
+  margin-bottom:3px;font-family:'Cinzel',serif;
+}
+.game-item-desc{font-size:11px;color:var(--text2);line-height:1.6;}
+
+/* divider */
+.divider{height:1px;background:var(--border);margin:40px 0;}
+
+/* FAQ */
+.faq{display:flex;flex-direction:column;gap:10px;}
+.faq-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.faq-q{
+  padding:14px 16px;font-size:13px;color:var(--text);
+  font-weight:500;cursor:pointer;
+  display:flex;align-items:center;gap:10px;
+  user-select:none;
+}
+.faq-q::before{
+  content:'Q';font-family:'Cinzel',serif;font-size:10px;
+  color:var(--gold2);background:rgba(160,120,48,.1);
+  border:1px solid rgba(160,120,48,.3);border-radius:4px;
+  padding:2px 7px;flex-shrink:0;
+}
+.faq-a{
+  padding:0 16px 14px 16px;
+  font-size:13px;color:var(--text2);line-height:1.8;
+  border-top:1px solid var(--border);padding-top:12px;
+}
+
+/* フッター */
+.footer{
+  text-align:center;padding:40px 24px;
+  border-top:1px solid var(--border);
+  font-size:11px;color:var(--text3);letter-spacing:.08em;
+}
+.footer-title{
+  font-family:'Cinzel',serif;font-size:13px;
+  color:var(--gold2);letter-spacing:.2em;margin-bottom:8px;
+}
+
+/* レスポンシブ */
+@media(max-width:480px){
+  .hero{padding:48px 16px 40px;}
+  .toc,.main{padding-left:16px;padding-right:16px;}
+  .game-grid{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-logo">
+    <svg width="36" height="36" viewBox="0 0 32 32">
+      <polygon points="16,3 29,10 29,22 16,29 3,22 3,10" fill="none" stroke="#a07830" stroke-width="1"/>
+      <polygon points="16,7 25,12 25,20 16,25 7,20 7,12" fill="rgba(90,63,138,.25)" stroke="rgba(90,63,138,.5)" stroke-width=".8"/>
+      <circle cx="16" cy="16" r="2.5" fill="#a07830"/>
+      <circle cx="16" cy="16" r="1.2" fill="#e8c87a"/>
+    </svg>
+    <div>
+      <div class="hero-title">SAVE POINT</div>
+      <div class="hero-subtitle">SKILLBASE QUEST LOG</div>
+    </div>
+  </div>
+  <div class="hero-desc">
+    SAVE POINTは、日々のタスクをRPGのクエストとして管理するツールです。<br>
+    やるべきことを「討伐する」感覚で、毎日少しずつ前進していきましょう。
+  </div>
+  <div class="hero-tagline">― 冒険の記録を、ここに刻む ―</div>
+</div>
+
+<!-- TOC -->
+<div class="toc">
+  <div class="toc-title">目次</div>
+  <div class="toc-grid">
+    <a class="toc-item" href="#sec1"><span class="toc-num">01</span> SAVE POINTとは</a>
+    <a class="toc-item" href="#sec2"><span class="toc-num">02</span> はじめかた</a>
+    <a class="toc-item" href="#sec3"><span class="toc-num">03</span> 今日タブの使い方</a>
+    <a class="toc-item" href="#sec4"><span class="toc-num">04</span> プロジェクトログ</a>
+    <a class="toc-item" href="#sec5"><span class="toc-num">05</span> 月の誓い</a>
+    <a class="toc-item" href="#sec6"><span class="toc-num">06</span> 週PDCA</a>
+    <a class="toc-item" href="#sec7"><span class="toc-num">07</span> 精霊</a>
+    <a class="toc-item" href="#sec8"><span class="toc-num">08</span> ゲームの仕組み</a>
+    <a class="toc-item" href="#sec9"><span class="toc-num">09</span> よくある質問</a>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- 01 -->
+  <div class="section" id="sec1">
+    <div class="section-header">
+      <div class="section-num">01</div>
+      <div class="section-title">SAVE POINT とは</div>
+    </div>
+    <div class="desc">
+      SAVE POINTは、<strong>毎日開きたくなるタスク管理ツール</strong>です。<br>
+      普通のTODOアプリと違い、タスクを「クエスト」として捉え、完了するたびにゴールド（G）とEXPを獲得できます。
+    </div>
+    <div class="point-box">
+      <div class="point-box-title">&#9670; SAVE POINTの考え方</div>
+      「全部やらなければ」ではなく「今日も少し前進した」を積み重ねることを大切にしています。<br>
+      完璧を目指すのではなく、<strong>毎日セーブポイントに立ち寄る習慣</strong>を作ることがゴールです。
+    </div>
+    <div class="desc">
+      スマホ・PCどちらでも使えます。データはブラウザに保存されるため、アカウント登録は不要です。
+    </div>
+  </div>
+
+  <!-- 02 -->
+  <div class="section" id="sec2">
+    <div class="section-header">
+      <div class="section-num">02</div>
+      <div class="section-title">はじめかた</div>
+    </div>
+    <div class="desc">URLをブラウザで開けば、すぐに使えます。インストール不要です。</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-title">ブラウザでURLを開く</div>
+          <div class="step-desc">スマホのSafari・Chrome、またはPCのブラウザでアクセスします。</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-title">ホーム画面に追加する（推奨）</div>
+          <div class="step-desc">
+            スマホの場合、ホーム画面に追加するとアプリのように使えます。<br>
+            iPhone：Safariで開いて → 共有ボタン →「ホーム画面に追加」<br>
+            Android：Chromeで開いて → メニュー →「ホーム画面に追加」
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-title">今日のクエストを追加して討伐する</div>
+          <div class="step-desc">「今日」タブで今日やることを入力して、完了したらタップするだけです。</div>
+        </div>
+      </div>
+    </div>
+    <div class="info-box">
+      <div class="info-box-title">&#9670; データについて</div>
+      データはあなたのブラウザ（localStorage）に保存されます。<br>
+      ブラウザのデータを削除すると、データもリセットされますのでご注意ください。
+    </div>
+  </div>
+
+  <!-- 03 -->
+  <div class="section" id="sec3">
+    <div class="section-header">
+      <div class="section-num">03</div>
+      <div class="section-title">今日タブの使い方</div>
+    </div>
+    <div class="desc">
+      毎日開く場所です。<strong>今日やること</strong>だけを集中して管理します。
+    </div>
+    <div class="tab-cards">
+      <div class="tab-card" style="--accent:#c8a050;">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:2px;background:#c8a050;border-radius:2px 0 0 2px;"></div>
+        <div class="tab-card-icon" style="background:rgba(200,160,80,.1);">📋</div>
+        <div class="tab-card-body">
+          <div class="tab-card-name">TODAY'S QUEST（今日やること）</div>
+          <div class="tab-card-desc">最も重要なタスクを置く場所。金色のラインで強調されます。完了するとゴールドとEXPを多く獲得できます。</div>
+          <div class="tab-card-tag">+15G / +30 EXP</div>
+        </div>
+      </div>
+      <div class="tab-card">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--teal2);border-radius:2px 0 0 2px;"></div>
+        <div class="tab-card-icon" style="background:rgba(42,128,112,.1);">🔄</div>
+        <div class="tab-card-body">
+          <div class="tab-card-name">日次収益クエスト</div>
+          <div class="tab-card-desc">毎日繰り返す習慣タスク。出品・いいね回りなどのルーティンを置きます。毎日リセットされます。</div>
+          <div class="tab-card-tag">+10G / +20 EXP</div>
+        </div>
+      </div>
+      <div class="tab-card">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--text3);border-radius:2px 0 0 2px;"></div>
+        <div class="tab-card-icon" style="background:rgba(90,79,106,.1);">🏠</div>
+        <div class="tab-card-body">
+          <div class="tab-card-name">生活・運動</div>
+          <div class="tab-card-desc">ゴミ出し・洗濯・運動などの生活タスク。小さくても積み重なります。</div>
+          <div class="tab-card-tag">+5G / +10 EXP</div>
+        </div>
+      </div>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">+</div>
+        <div class="step-body">
+          <div class="step-title">クエストを追加する</div>
+          <div class="step-desc">画面下の入力欄にタスクを入力して「+」を押します。セクション（今日 / 日次 / 生活）を選んで追加できます。</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">✓</div>
+        <div class="step-body">
+          <div class="step-title">完了したらタップ</div>
+          <div class="step-desc">クエストをタップすると討伐完了。ゴールドと金粉エフェクトが出ます。</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">✕</div>
+        <div class="step-body">
+          <div class="step-title">不要なクエストを削除</div>
+          <div class="step-desc">各クエストの右端の「✕」で削除できます。入力ミスや不要になったものを消せます。</div>
+        </div>
+      </div>
+    </div>
+    <div class="point-box">
+      <div class="point-box-title">&#9670; チェックの仕組み</div>
+      チェックは当日限り有効です。翌日になると自動的にリセットされ、新しい一日として始まります。<br>
+      追加したクエストは削除しない限り翌日も残ります。
+    </div>
+  </div>
+
+  <!-- 04 -->
+  <div class="section" id="sec4">
+    <div class="section-header">
+      <div class="section-num">04</div>
+      <div class="section-title">プロジェクトログ</div>
+    </div>
+    <div class="desc">
+      数日〜数ヶ月かかる<strong>長期プロジェクトを管理</strong>する場所です。締切と進捗を見渡せます。
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-title">プロジェクトを追加する</div>
+          <div class="step-desc">プロジェクト名・開始日・締切を入力して「刻む」を押します。色が自動で割り当てられます。</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-title">進捗を更新する</div>
+          <div class="step-desc">+5% / +10% ボタンで進捗を記録します。途中の進捗ではEXPのみ獲得できます。</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-title">討伐完了で報酬獲得</div>
+          <div class="step-desc">「討伐完了」を押すと +100G +100 EXP を獲得できます。完了時のみゴールドが入ります。</div>
+        </div>
+      </div>
+    </div>
+    <div class="info-box">
+      <div class="info-box-title">&#9670; PCでの表示</div>
+      PCで開くと2カラムのガントチャート表示に切り替わります。左に一覧、右に日単位のタイムラインが表示され、今日の位置が金色のラインで示されます。
+    </div>
+  </div>
+
+  <!-- 05 -->
+  <div class="section" id="sec5">
+    <div class="section-header">
+      <div class="section-num">05</div>
+      <div class="section-title">月の誓い</div>
+    </div>
+    <div class="desc">
+      数値では管理できない「<strong>今月どう在りたいか</strong>」を刻む場所です。KPI管理ではなく、意思や宣言を置くページです。
+    </div>
+    <div class="point-box">
+      <div class="point-box-title">&#9670; 例えばこんな誓いを</div>
+      ・出品を止めない。毎日一つでも前に進む。<br>
+      ・撮影に丁寧に向き合う。<br>
+      ・朝を整える。開幕を大切にする。<br>
+      ・読書を始める。
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-title">誓いを入力して「刻む」</div>
+          <div class="step-desc">テキストを入力し、色を選んで刻みます。いつ刻んだかも記録されます。</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-title">「体現している」で記録</div>
+          <div class="step-desc">誓いを実践できていると感じたら「体現している」を押します。+5Gが入ります。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 06 -->
+  <div class="section" id="sec6">
+    <div class="section-header">
+      <div class="section-num">06</div>
+      <div class="section-title">週PDCA</div>
+    </div>
+    <div class="desc">
+      週単位で数値目標（KPI）を管理し、振り返りを記録する場所です。
+    </div>
+    <div class="tab-cards">
+      <div class="tab-card">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--purple2);border-radius:2px 0 0 2px;"></div>
+        <div class="tab-card-body">
+          <div class="tab-card-name">PLAN — 今週の目標を設定</div>
+          <div class="tab-card-desc">KPI名・目標値・単位を入力して週の目標を刻みます。（例：メルカリ売上 / 150000 / 円）</div>
+        </div>
+      </div>
+      <div class="tab-card">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--gold2);border-radius:2px 0 0 2px;"></div>
+        <div class="tab-card-body">
+          <div class="tab-card-name">CHECK — 現在値を入力</div>
+          <div class="tab-card-desc">現在の数値を入力すると達成率が自動計算されます。目標達成で +50G 獲得。</div>
+        </div>
+      </div>
+      <div class="tab-card">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--teal2);border-radius:2px 0 0 2px;"></div>
+        <div class="tab-card-body">
+          <div class="tab-card-name">DO / ACT — 振り返りメモ</div>
+          <div class="tab-card-desc">今週やったこと・来週に活かすことを自由に記録します。週をまたいでも保存されます。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 07 -->
+  <div class="section" id="sec7">
+    <div class="section-header">
+      <div class="section-num">07</div>
+      <div class="section-title">精霊</div>
+    </div>
+    <div class="desc">
+      あなたの<strong>静かな相棒</strong>です。200Gで契約でき、今日の達成率に応じて状態が変化します。言葉ではなく、見た目で感情を表現します。
+    </div>
+    <div class="game-grid">
+      <div class="game-item">
+        <div class="game-item-label">状態</div>
+        <div class="game-item-val" style="font-size:13px;">絶好調</div>
+        <div class="game-item-desc">達成率80%以上。金色に輝きます。</div>
+      </div>
+      <div class="game-item">
+        <div class="game-item-label">状態</div>
+        <div class="game-item-val" style="font-size:13px;">元気</div>
+        <div class="game-item-desc">達成率50%以上。普通の状態。</div>
+      </div>
+      <div class="game-item">
+        <div class="game-item-label">状態</div>
+        <div class="game-item-val" style="font-size:13px;">サボり</div>
+        <div class="game-item-desc">達成率20%以上。少し元気なし。</div>
+      </div>
+      <div class="game-item">
+        <div class="game-item-label">状態</div>
+        <div class="game-item-val" style="font-size:13px;color:var(--purple3);">屍・毒</div>
+        <div class="game-item-desc">達成率20%未満。紫色になります。</div>
+      </div>
+    </div>
+    <div class="desc">
+      タイプは炎・水・光・闇・風の5種類。名前をつけて契約します。精霊は右下に常駐し、クエストを完了するたびに反応します。
+    </div>
+  </div>
+
+  <!-- 08 -->
+  <div class="section" id="sec8">
+    <div class="section-header">
+      <div class="section-num">08</div>
+      <div class="section-title">ゲームの仕組み</div>
+    </div>
+    <div class="desc">クエストを完了するたびにゴールドとEXPが入ります。</div>
+    <div class="game-grid">
+      <div class="game-item">
+        <div class="game-item-label">GOLD（G）</div>
+        <div class="game-item-val">&#9670; G</div>
+        <div class="game-item-desc">クエスト完了・目標達成などで獲得。精霊の契約（200G）に使います。</div>
+      </div>
+      <div class="game-item">
+        <div class="game-item-label">EXP</div>
+        <div class="game-item-val">EXP</div>
+        <div class="game-item-desc">500 EXPでレベルアップ。レベルはヘッダーに表示されます。</div>
+      </div>
+      <div class="game-item">
+        <div class="game-item-label">レベル</div>
+        <div class="game-item-val">Lv.</div>
+        <div class="game-item-desc">EXPが500に達するとレベルが上がります。リセットされません。</div>
+      </div>
+      <div class="game-item">
+        <div class="game-item-label">ALL CLEAR</div>
+        <div class="game-item-val" style="font-size:11px;letter-spacing:.1em;">ALL CLEAR</div>
+        <div class="game-item-desc">今日のクエストを全て完了するとボーナス +100G が入ります。</div>
+      </div>
+    </div>
+    <div class="point-box">
+      <div class="point-box-title">&#9670; ゴールド獲得の目安</div>
+      TODAY'S QUEST 完了：+15G<br>
+      日次収益クエスト 完了：+10G<br>
+      生活・運動クエスト 完了：+5G<br>
+      ALL CLEAR ボーナス：+100G<br>
+      プロジェクト討伐完了：+100G<br>
+      KPI目標達成：+50G<br>
+      誓いを体現中：+5G
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- 09 -->
+  <div class="section" id="sec9">
+    <div class="section-header">
+      <div class="section-num">09</div>
+      <div class="section-title">よくある質問</div>
+    </div>
+    <div class="faq">
+      <div class="faq-item">
+        <div class="faq-q">チェックしたタスクが翌日消えた</div>
+        <div class="faq-a">正常な動作です。チェック状態は毎日リセットされます。追加したクエスト自体は削除しない限り残ります。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">ブラウザを変えたらデータが消えた</div>
+        <div class="faq-a">データはブラウザのlocalStorageに保存されています。別のブラウザや端末では引き継がれません。いつも同じブラウザで開くことをおすすめします。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">固定クエスト（最初から入っているもの）を消したい</div>
+        <div class="faq-a">各クエストの右端の「✕」ボタンで削除できます。削除しても再読み込みで戻ることはありません。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">精霊の契約にゴールドが足りない</div>
+        <div class="faq-a">まずクエストをいくつか完了してゴールドを貯めてください。ALL CLEARで+100Gが入るので、その後に契約できます。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">他の人とデータを共有できる？</div>
+        <div class="faq-a">現在はできません。URLをシェアすれば同じアプリを使えますが、データはそれぞれのブラウザに独立して保存されます。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">スマホとPCで同期できる？</div>
+        <div class="faq-a">現在はできません。データはブラウザに保存されるため、スマホとPCは別々のデータになります。メインで使うデバイスを1つ決めることをおすすめします。</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="footer-title">SAVE POINT</div>
+  SKILLBASE QUEST LOG — 冒険の記録を、ここに刻む
+</div>
+
+</body>
+</html>
