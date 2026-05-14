@@ -960,37 +960,80 @@ html,body{
 
 <!-- プロジェクトログ -->
 <div class="view" id="view-proj">
-  <div class="tsukiyo-bar">
-    <svg width="40" height="40" viewBox="0 0 44 44" style="flex-shrink:0;opacity:.9;">
-      <circle cx="22" cy="22" r="20" fill="#0f0c1a" stroke="rgba(90,63,138,.5)" stroke-width="1.5"/>
-      <ellipse cx="22" cy="26" rx="11" ry="9" fill="#0a0814"/>
-      <ellipse cx="22" cy="20" rx="10" ry="11" fill="#130f22"/>
-      <polygon points="14,12 11,4 18,10" fill="#130f22"/>
-      <polygon points="30,12 33,4 26,10" fill="#130f22"/>
-      <circle cx="18" cy="20" r="3" fill="#8a3a10"/><circle cx="26" cy="20" r="3" fill="#8a3a10"/>
-      <circle cx="18" cy="20" r="1.5" fill="#c06030"/><circle cx="26" cy="20" r="1.5" fill="#c06030"/>
-      <path d="M19 26 Q22 28 25 26" stroke="var(--purple2)" stroke-width="1" fill="none" stroke-linecap="round"/>
-    </svg>
-    <div>
-      <div class="tsukiyo-name">つきよ</div>
-      <div class="tsukiyo-msg">締切まであと何日、今どこまで進んでいるか。それだけを見ればいいにゃ。</div>
+
+  <!-- スマホ版 -->
+  <div class="proj-mobile-only">
+    <div class="tsukiyo-bar">
+      <svg width="40" height="40" viewBox="0 0 44 44" style="flex-shrink:0;opacity:.9;">
+        <circle cx="22" cy="22" r="20" fill="#0f0c1a" stroke="rgba(90,63,138,.5)" stroke-width="1.5"/>
+        <ellipse cx="22" cy="26" rx="11" ry="9" fill="#0a0814"/>
+        <ellipse cx="22" cy="20" rx="10" ry="11" fill="#130f22"/>
+        <polygon points="14,12 11,4 18,10" fill="#130f22"/>
+        <polygon points="30,12 33,4 26,10" fill="#130f22"/>
+        <circle cx="18" cy="20" r="3" fill="#8a3a10"/><circle cx="26" cy="20" r="3" fill="#8a3a10"/>
+        <circle cx="18" cy="20" r="1.5" fill="#c06030"/><circle cx="26" cy="20" r="1.5" fill="#c06030"/>
+        <path d="M19 26 Q22 28 25 26" stroke="var(--purple2)" stroke-width="1" fill="none" stroke-linecap="round"/>
+      </svg>
+      <div><div class="tsukiyo-name">つきよ</div><div class="tsukiyo-msg">締切まであと何日、今どこまで進んでいるか。それだけを見ればいいにゃ。</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:14px;">
+      <div class="proj-stat-card"><div class="proj-stat-label">ACTIVE</div><div class="proj-stat-val" id="ps-active">0</div><div class="proj-stat-sub">進行中</div></div>
+      <div class="proj-stat-card"><div class="proj-stat-label">URGENT</div><div class="proj-stat-val" id="ps-urgent" style="color:var(--red2);">0</div><div class="proj-stat-sub">7日以内</div></div>
+      <div class="proj-stat-card"><div class="proj-stat-label">DONE</div><div class="proj-stat-val" id="ps-done">0</div><div class="proj-stat-sub">完了</div></div>
+    </div>
+    <div id="proj-cards"></div>
+    <div class="proj-add-form">
+      <div class="form-label">&#9670; 新しいプロジェクトを刻む</div>
+      <input class="form-input" id="pj-name" placeholder="プロジェクト名..." type="text"/>
+      <div class="form-row">
+        <input class="form-input" id="pj-start" type="date"/>
+        <input class="form-input" id="pj-end" type="date"/>
+      </div>
+      <button class="submit-btn" onclick="addProject()">&#9670; 刻む</button>
     </div>
   </div>
-  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:14px;">
-    <div class="proj-stat-card"><div class="proj-stat-label">ACTIVE</div><div class="proj-stat-val" id="ps-active">0</div><div class="proj-stat-sub">進行中</div></div>
-    <div class="proj-stat-card"><div class="proj-stat-label">URGENT</div><div class="proj-stat-val" id="ps-urgent" style="color:var(--red2);">0</div><div class="proj-stat-sub">7日以内</div></div>
-    <div class="proj-stat-card"><div class="proj-stat-label">DONE</div><div class="proj-stat-val" id="ps-done">0</div><div class="proj-stat-sub">完了</div></div>
-  </div>
-  <div id="proj-cards"></div>
-  <div class="proj-add-form">
-    <div class="form-label">&#9670; 新しいプロジェクトを刻む</div>
-    <input class="form-input" id="pj-name" placeholder="プロジェクト名..." type="text"/>
-    <div class="form-row">
-      <input class="form-input" id="pj-start" type="date"/>
-      <input class="form-input" id="pj-end" type="date"/>
+
+  <!-- PC版（2カラム） -->
+  <div class="proj-pc-only" style="margin:-14px -14px;">
+    <div class="proj-pc-layout">
+      <!-- 左：一覧 -->
+      <div class="proj-pc-left">
+        <div class="proj-pc-panel-title">クエスト一覧</div>
+        <div id="pc-proj-list"></div>
+        <button class="proj-pc-add-sm" onclick="document.getElementById('pc-add-form').scrollIntoView({behavior:'smooth'})">+ 新しいクエストを刻む</button>
+      </div>
+      <!-- 右：ガント＋詳細 -->
+      <div class="proj-pc-right">
+        <div class="proj-month-nav">
+          <button class="proj-mnav-btn" onclick="pcChangeMonth(-1)">&#8249;</button>
+          <div class="proj-month-label" id="pc-month-label"></div>
+          <button class="proj-mnav-btn" onclick="pcChangeMonth(1)">&#8250;</button>
+          <button class="proj-today-btn" onclick="pcGoToday()">今日に戻る</button>
+        </div>
+        <div class="gantt-wrap" id="pc-gantt-wrap"></div>
+        <div class="proj-detail-panel" id="pc-detail-panel" style="display:none;"></div>
+        <div class="proj-add-form-pc" id="pc-add-form">
+          <div class="form-label" style="font-size:10px;color:var(--text2);letter-spacing:.1em;margin-bottom:11px;">&#9670; 新しいプロジェクトを刻む</div>
+          <div class="proj-add-form-grid">
+            <div class="proj-form-group">
+              <div class="proj-form-label">プロジェクト名</div>
+              <input class="form-input" id="pc-pj-name" placeholder="例：スナラボLP作成" type="text"/>
+            </div>
+            <div class="proj-form-group">
+              <div class="proj-form-label">開始日</div>
+              <input class="form-input" id="pc-pj-start" type="date"/>
+            </div>
+            <div class="proj-form-group">
+              <div class="proj-form-label">締切</div>
+              <input class="form-input" id="pc-pj-end" type="date"/>
+            </div>
+            <button class="submit-btn" onclick="pcAddProject()" style="padding:8px 16px;white-space:nowrap;">&#9670; 刻む</button>
+          </div>
+        </div>
+      </div>
     </div>
-    <button class="submit-btn" onclick="addProject()">&#9670; 刻む</button>
   </div>
+
 </div>
 
 <!-- 月の誓い -->
@@ -1665,7 +1708,7 @@ function renderAll(){
   if(S.spirit&&S.spirit.contracted){spType=S.spirit.type;renderSpiritView();}
   else renderTypeGrid();
 }
-load();initProjDates();renderAll();initPC();
+load();initProjDates();renderAll();
 // ══ PC版プロジェクトログ ══
 let pcSelectedId=null;
 let pcViewYear=new Date().getFullYear(),pcViewMonth=new Date().getMonth();
@@ -1890,6 +1933,8 @@ function initPC(){
 window.addEventListener('resize',()=>{
   if(window.innerWidth>=768)initPC();
 });
+// 初回実行
+initPC();
 
 </script>
 </body>
