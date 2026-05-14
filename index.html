@@ -1692,17 +1692,25 @@ function popEl(id){const el=document.getElementById(id);if(!el)return;el.classLi
 function showLevelUp(){document.getElementById('new-lv').textContent=S.lv;const b=document.getElementById('lu-banner');b.classList.add('show');setTimeout(()=>b.classList.remove('show'),2500);}
 function showAllClear(){
   S.gold+=100;save();updateStats();
-  const wrap=document.getElementById('stars-wrap');wrap.innerHTML='';
-  const cols=['#c8a050','#9060b0','#2a8070','#c8a050','#e8d8a0'];
-  for(let i=0;i<30;i++){
-    const s=document.createElement('div');s.className='star';
-    const sz=2+Math.random()*3;
-    s.style.cssText=`left:${Math.random()*100}%;top:-10px;width:${sz}px;height:${sz}px;background:${cols[i%5]};animation-duration:${2+Math.random()*2.5}s;animation-delay:${Math.random()*.8}s;`;
-    wrap.appendChild(s);
-  }
-  document.getElementById('all-clear').classList.add('show');
+  const existing=document.getElementById('all-clear-overlay');
+  if(existing)existing.remove();
+  const cols=['#c8a050','#9060b0','#2a8070','#e8d8a0','#f0e0a0'];
+  const el=document.createElement('div');
+  el.id='all-clear-overlay';
+  el.style.cssText='position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(8,6,18,.92);display:flex;align-items:center;justify-content:center;z-index:9999;';
+  let stars='';
+  for(let i=0;i<30;i++){const sz=2+Math.random()*3;stars+=`<div class="star" style="position:absolute;left:${Math.random()*100}%;top:-10px;width:${sz}px;height:${sz}px;border-radius:50%;background:${cols[i%5]};animation:starFall ${2+Math.random()*2.5}s linear ${Math.random()*.8}s forwards;"></div>`;}
+  el.innerHTML=`
+    <div style="position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;overflow:hidden;">${stars}</div>
+    <div style="text-align:center;padding:32px;position:relative;z-index:1;">
+      <div style="font-family:'Cinzel',serif;font-size:22px;color:#c8a050;letter-spacing:.25em;margin-bottom:8px;">ALL CLEAR</div>
+      <div style="font-size:12px;color:#8a7a9a;line-height:1.8;margin-bottom:16px;">全クエスト討伐完了にゃ。<br>今日もよくやったにゃ、パートナー。</div>
+      <div style="font-size:14px;color:#c8a050;margin-bottom:22px;">&#9670; +100G ボーナス獲得 &#9670;</div>
+      <button onclick="document.getElementById('all-clear-overlay').remove()" style="padding:10px 28px;border-radius:8px;border:1px solid #a07830;background:transparent;color:#c8a050;cursor:pointer;font-size:13px;font-family:'Cinzel',serif;letter-spacing:.12em;">続ける</button>
+    </div>`;
+  document.body.appendChild(el);
 }
-function closeAllClear(){document.getElementById('all-clear').classList.remove('show');}
+function closeAllClear(){const el=document.getElementById('all-clear-overlay');if(el)el.remove();}
 
 // ── INIT ──
 function initProjDates(){
