@@ -701,10 +701,12 @@ html,body{
 
 /* ALL CLEAR */
 .all-clear{
-  position:fixed;top:0;left:0;right:0;bottom:0;
+  position:fixed;top:0;left:0;
+  width:100vw;height:100vh;
   background:rgba(8,6,18,.92);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  z-index:200;opacity:0;pointer-events:none;transition:opacity .5s;
+  z-index:9999;opacity:0;pointer-events:none;transition:opacity .5s;
+  max-width:none !important;
 }
 .all-clear.show{opacity:1;pointer-events:all;}
 .ac-inner{text-align:center;padding:32px;position:relative;}
@@ -1195,7 +1197,7 @@ const BACKLOG=[];
 const PROJ_COLORS=['#8060b0','#1D9E75','#c87020','#185FA5','#993556','#a07030','#2a6a5a'];
 const DEF={
   gold:0,xp:0,lv:0,streak:0,lastDate:'',
-  done:{},extraTasks:[],
+  done:{},extraTasks:[],hiddenQs:[],
   projects:[],
   vows:[],
   weeks:{},
@@ -1206,7 +1208,7 @@ let S={},nextId=1000,spType='dark',weekOffset=0,selectedVowColor='#8060b0';
 function load(){
   try{S=JSON.parse(localStorage.getItem(SK))||{};}catch(e){S={};}
   S=Object.assign({},DEF,S);
-  if(!S.done)S.done={};if(!S.extraTasks)S.extraTasks=[];
+  if(!S.done)S.done={};if(!S.extraTasks)S.extraTasks=[];if(!S.hiddenQs)S.hiddenQs=[];
   if(!S.projects)S.projects=DEF.projects;if(!S.vows)S.vows=DEF.vows;
   if(!S.weeks)S.weeks={};if(!S.spirit)S.spirit=DEF.spirit;
   if(S.lastDate!==TODAY_STR){S.done={};S.lastDate=TODAY_STR;save();}
@@ -1264,7 +1266,7 @@ function renderTodayQs(){
   let html='';
   for(const sec of secs){
     const cfg=SEC_CFG[sec];
-    const fixedQ=FIXED_QUESTS[sec]||[];
+    const fixedQ=(FIXED_QUESTS[sec]||[]).filter(q=>!S.hiddenQs.includes(q.id));
     const extraQ=S.extraTasks.filter(q=>q.sec===sec);
     const items=[...fixedQ,...extraQ];
     if(!items.length)continue;
@@ -1285,20 +1287,22 @@ function renderTodayQs(){
           <div class="pi-sub">
             <div class="pi-reward">&#9670; +${cfg.gold}G &nbsp;&#9670; +${cfg.exp} EXP</div>
             <div class="pi-hint">${done?'&#10003; 討伐済み':'タップで討伐'}</div>
-            <button onclick="deleteMainQ('${q.id}')" style="margin-left:auto;background:none;border:none;color:var(--text3);cursor:pointer;font-size:11px;opacity:.45;padding:2px 4px;transition:opacity .15s;" onmouseover="this.style.opacity='.9'" onmouseout="this.style.opacity='.45'">✕</button>
+            <button onclick="deleteTodayQ('${q.id}')" style="margin-left:auto;background:none;border:none;color:var(--text3);cursor:pointer;font-size:11px;opacity:.45;padding:2px 4px;transition:opacity .15s;" onmouseover="this.style.opacity='.9'" onmouseout="this.style.opacity='.45'">✕</button>
           </div>
         </div>`;
       } else if(sec==='routine'){
-        html+=`<div class="routine-item${done?' done':''}" id="ci_${q.id}" onclick="toggleQ('${q.id}','${sec}')">
-          <div class="ri-check"></div>
-          <span class="ri-text">${q.text}</span>
+        html+=`<div class="routine-item${done?' done':''}" id="ci_${q.id}">
+          <div class="ri-check" onclick="toggleQ('${q.id}','${sec}')"></div>
+          <span class="ri-text" onclick="toggleQ('${q.id}','${sec}')">${q.text}</span>
           ${!done?`<span class="ri-gold">+${cfg.gold}G</span>`:''}
+          <button onclick="deleteTodayQ('${q.id}')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:10px;opacity:.35;padding:2px 4px;flex-shrink:0;" onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='.35'">✕</button>
         </div>`;
       } else {
-        html+=`<div class="life-item${done?' done':''}" id="ci_${q.id}" onclick="toggleQ('${q.id}','${sec}')">
+        html+=`<div class="life-item${done?' done':''}" id="ci_${q.id}">
           <div class="li-dot"></div>
-          <span class="li-text">${q.text}</span>
-          <div class="li-check"></div>
+          <span class="li-text" onclick="toggleQ('${q.id}','${sec}')">${q.text}</span>
+          <div class="li-check" onclick="toggleQ('${q.id}','${sec}')"></div>
+          <button onclick="deleteTodayQ('${q.id}')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:10px;opacity:.3;padding:2px 4px;flex-shrink:0;margin-left:4px;" onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='.3'">✕</button>
         </div>`;
       }
     }
@@ -1323,8 +1327,14 @@ function toggleQ(id,sec){
   const{done,total}=calcStats();
   if(done>=total-1)setTimeout(()=>showAllClear(),600);
 }
-function deleteMainQ(id){
-  S.extraTasks=S.extraTasks.filter(q=>q.id!==id);
+function deleteTodayQ(id){
+  // extraTasksにあれば削除、なければ固定クエストなのでhiddenQsに追加
+  const isExtra=S.extraTasks.some(q=>q.id===id);
+  if(isExtra){
+    S.extraTasks=S.extraTasks.filter(q=>q.id!==id);
+  } else {
+    if(!S.hiddenQs.includes(id))S.hiddenQs.push(id);
+  }
   delete S.done[id];
   save();renderTodayQs();updateStats();
 }
